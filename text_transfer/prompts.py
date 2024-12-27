@@ -1,0 +1,72 @@
+# prompt模板使用Jinja2语法，简单点就是用双大括号代替f-string的单大括号
+# 本配置文件支持热加载，修改prompt模板后无需重启服务。
+
+# LLM对话支持的变量：
+#   - input: 用户输入内容
+
+# Agent对话支持的变量：
+
+#   - tools: 可用的工具列表
+#   - tool_names: 可用的工具名称列表
+#   - history: 用户和Agent的对话历史
+#   - input: 用户输入内容
+#   - agent_scratchpad: Agent的思维记录
+from text_transfer.prompt import PromptJSQL
+promptJSQL = PromptJSQL()
+embrace_background_dict =  promptJSQL.generate_prompt()
+embrace_lang =  embrace_background_dict["sys_prompt"] + embrace_background_dict["background_prompt"] +\
+      embrace_background_dict["parsestatus_prompt"] + embrace_background_dict["test_example"] + embrace_background_dict["output_prompt"]
+
+PROMPT_TEMPLATES = {
+        "llm_chat": {
+            "default":
+                '{{ input }}',
+
+            "with_history":
+                'Answer my questions considering the coversation history.'
+                'If you do not know the answer, just say do not know. \n\n'
+                'Current conversation:\n'
+                '{history}\n',
+
+            "embrace": # 这些是2024年的
+                '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。'
+                '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战，'
+                '我方需要攻取位于经纬度坐标(100.1247, 13.6615)的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标(100.137,13.644),(100.116,13.643)(100.164,13.658)有可供步兵占领和建立防线的建筑物。'
+                '每隔一定步数，我将告诉你敌我态势和其他信息，并由你来尝试生成作战指令。\n'
+                '在生成指令时，可以考虑历史态势和指令，下面是我们的对话历史：\n'
+                '{history}'
+                '请按照以下格式给出作战指令。进攻指令： [move, obj_id , x=int, y=int] , \n 如坦克MainBattleTank_ZTZ100_0和无人突击车ArmoredTruck_ZTL100_0进攻坐标(100.1247, 13.6615)，则指令为两条 [move, obj_id=MainBattleTank_ZTZ100_0, x=100.1247, y=13.6615],[move, obj_id=ArmoredTruck_ZTL100_0, x=100.1247, y=13.6615]  \n停止指令： [stop, obj_id],\n  如步兵Infantry0停止当前行动，则指令为[stop, obj_id=Infantry0] \n 步兵下车指令: [off_board, obj_id] , \n 如步战车WheeledCmobatTruck_ZB100_1内步兵立刻下车,则指令为 [off_board, obj_id=WheeledCmobatTruck_ZB100_1] ',
+
+            "embrace_red": # 这些是2024年的
+                '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。'
+                '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战，'
+                '我方需要攻取位于经纬度坐标(100.1247, 13.6615)的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标(100.137,13.644),(100.116,13.643)(100.164,13.658)有可供步兵占领和建立防线的建筑物。'
+                '每隔一定步数，我将告诉你敌我态势和其他信息，并由你来尝试生成作战指令。\n'
+                '在生成指令时，可以考虑历史态势和指令，下面是我们的对话历史：\n'
+                '{history}'
+                '请按照以下格式给出作战指令。进攻指令： [move, obj_id , x=int, y=int] , \n 如坦克MainBattleTank_ZTZ100_0和无人突击车ArmoredTruck_ZTL100_0进攻坐标(100.1247, 13.6615)，则指令为两条 [move, obj_id=MainBattleTank_ZTZ100_0, x=100.1247, y=13.6615],[move, obj_id=ArmoredTruck_ZTL100_0, x=100.1247, y=13.6615]  \n停止指令： [stop, obj_id],\n  如步兵Infantry0停止当前行动，则指令为[stop, obj_id=Infantry0] \n 步兵下车指令: [off_board, obj_id] , \n 如步战车WheeledCmobatTruck_ZB100_1内步兵立刻下车,则指令为 [off_board, obj_id=WheeledCmobatTruck_ZB100_1] ',
+
+            "embrace_blue": # 这些是2024年的
+                '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。'
+                '我方为蓝方，拥有坦克、步兵战车、步兵、无人突击车、巡飞弹、无人机、导弹发射车、导弹发射车等装备，步兵下车后作战，'
+                '我方需要防守于经纬度坐标(100.1247, 13.6615)的夺控点，确保敌方无法靠近和摧毁夺控点附近的我方导弹发射车，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。地图大部分为陆地，具有河流、桥梁和路网。在经纬度坐标(100.137,13.644),(100.116,13.643)(100.164,13.658)有可供步兵占领和建立防线的建筑物。'
+                '每隔一定步数，我将告诉你敌我态势和其他信息，并由你来尝试生成作战指令。\n'
+                '在生成指令时，可以考虑历史态势和指令，下面是我们的对话历史：\n'
+                '{history}'
+                '请按照以下格式给出作战指令。进攻指令： [move, obj_id , x=int, y=int] , \n 如坦克MainBattleTank_ZTZ100_0和无人突击车ArmoredTruck_ZTL100_0进攻坐标(100.1247, 13.6615)，则指令为两条 [move, obj_id=MainBattleTank_ZTZ100_0, x=100.1247, y=13.6615],[move, obj_id=ArmoredTruck_ZTL100_0, x=100.1247, y=13.6615]  \n停止指令： [stop, obj_id],\n  如步兵Infantry0停止当前行动，则指令为[stop, obj_id=Infantry0] \n 步兵下车指令: [off_board, obj_id] , \n 如步战车WheeledCmobatTruck_ZB100_1内步兵立刻下车,则指令为 [off_board, obj_id=WheeledCmobatTruck_ZB100_1] ',
+
+        
+            "jieshuo_embrace":
+                '请作为解说员，解说一场兵棋推演比赛，尽量讲清楚双方作战过程和行动逻辑。场景如下：'
+                '红方拥有坦克、步兵战车、自行迫榴炮、无人突击车和无人机、导弹发射车等装备，步兵下车后作战，'
+                '红方需要攻取位于经纬度坐标(100.1247, 13.6615)的夺控点，要将陆战装备移动到夺控点处并消灭夺控点附近敌人，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。地图大部分为陆地，具有河流、桥梁和路网。'
+                '蓝方则试图阻击，拥有更多的步兵力量和反导能力。并占据城市房屋'
+                '每隔一定步数，我将告诉你红蓝态势和其他信息，并由你来生成解说词\n'
+                '在生成指令时，可以考虑历史态势和指令，下面是我们的对话历史：\n'
+                '{history}',
+
+            "embrace_none": # 这个是不要预定义的东西了，全都从外面组装好后发进去。
+                ' '
+        
+        }
+    }

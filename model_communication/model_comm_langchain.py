@@ -90,6 +90,11 @@ class ModelCommLangchain():
                 system_template = PROMPT_TEMPLATES['llm_chat']['embrace']
         elif Comm_type == "jieshuo":
             system_template = PROMPT_TEMPLATES['llm_chat']['jieshuo_embrace']
+        elif Comm_type == "DeLLMa":
+            system_template = PROMPT_TEMPLATES['llm_chat']['embrace_none']
+        else:
+            raise Exception("Comm_type error")
+        
         prompt_template = ChatPromptTemplate.from_messages(
                 [("system", system_template), ("user", "{input}")]
             )

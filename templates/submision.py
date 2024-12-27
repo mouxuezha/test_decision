@@ -1,4 +1,7 @@
 # 这个是子任务的模板，原则上子任务应该实例化一个这个东西
+import os.path
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class submission():
     def __init__(self):
@@ -18,10 +21,11 @@ class submission():
     
     def _init_type(self,type):
         # 根据不同的任务类型，给出各种配置的限制和参考，专门组一个dict好了
+        # 后期的话这个应该是要调用知识图谱的。
         type_dict = {} 
         self.type_dict = type_dict
 
-# 这个先照着劳动竞赛的去写，看看成色。
+# 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
 submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]
     
     
