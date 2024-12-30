@@ -105,7 +105,7 @@ class ModelCommLangchain():
         self.chain = ConversationChain(
             prompt = prompt_template,
             llm = chat_model,
-            memory = ConversationBufferWindowMemory(k=3),
+            memory = ConversationBufferWindowMemory(k=1),
             output_parser = StrOutputParser()
         )
         self.msgs = self.chain.memory.buffer

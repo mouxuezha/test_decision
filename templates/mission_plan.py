@@ -2,6 +2,7 @@
 import os.path
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DeLLMa.DeLLMa import *
 
 class mission_plan():
     def __init__(self):
@@ -9,6 +10,7 @@ class mission_plan():
         self.target_str = "none"
         self.force_arrange = [] 
         self.submission_list = []
+        self.DeLLMa = DeLLMa()
 
     def compatibility_check(self, submission_list):
         # 这个是检测整个任务序列是否合法，别有各种冲突。至于检测规则可以后面慢慢加。
@@ -20,4 +22,8 @@ class mission_plan():
     
     def decide_next_submission(self):
         # 这个是决定下一个要执行的任务。
+        next_mission_json = self.DeLLMa.one_round()
+
+        # 设定好下一步的，然后得给出决策还没决策圆的地方
+
         return self.submission_list[0]
