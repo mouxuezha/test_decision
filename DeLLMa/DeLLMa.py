@@ -19,6 +19,7 @@ class DeLLMa():
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
         self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none")
+        self.config_assist = {} # 这个用来实现一些边缘的功能
 
     def set_utility_prompt(self, utility_prompt: str):
         self.utility_prompt = utility_prompt
@@ -131,6 +132,9 @@ class DeLLMa():
         # print(state_enumeration_prompt)
         # response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
         response_str = text_DeLLMa_state
+        if self.config_assist["num_round"]>1:
+            # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
+            response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
 
         # print(response_str)
 
@@ -147,6 +151,9 @@ class DeLLMa():
         # 好，弄好之后和大模型互动一波，看看出来的东西是什么样。
         # response_str = self.model_communication.communicate_with_model(dellma_prompt)
         response_str = text_DeLLMa_utility
+        if self.config_assist["num_round"]>1:
+            # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
+            response_str = self.model_communication.communicate_with_model(dellma_prompt)
 
         print(response_str)
 
@@ -195,6 +202,11 @@ class DeLLMa():
         return DeLLMa_prmpt,state_action_pair_list
 
     def one_round(self):
+        if "num_round" in self.config_assist:
+            self.config_assist["num_round"] += 1
+        else:
+            self.config_assist["num_round"]  = 0 
+
         # 别再叠床架屋了，这里直接给他冲了。这个要返回的是，下一个子任务是是什么。先别管多步的，先把一步的做了再说。
 
         state_forecasting_json = self.state_enumeration_and_forecasting(G="避免正面冲击敌防线")

@@ -16,7 +16,11 @@ class mission_arrange:
         one_plan = mission_plan()
 
         # 好，先把DeLLMa润起来看Prompt好了，冲就完事儿了。
-        one_plan.decide_next_submission()
+        next_submission = one_plan.decide_next_submission()
+
+        # 然后继续，这次主要解决的是在已经生成了一部分的基础上，继续生成。主要需要改的是context部分。
+        for i in range(3):
+            next_submission = one_plan.decide_next_submission()
 
         return one_plan
     

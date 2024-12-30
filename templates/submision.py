@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class submission():
-    def __init__(self):
+    def __init__(self,**kargs):
         self.id_str = "none"
         self.target_str = "none"
         self.indicator_list = []
@@ -15,6 +15,10 @@ class submission():
         self.force_arrange = [] 
         self.relation_list = [] 
         self.flag_well_defined = False
+        self.config_json = {} 
+
+        if "next_mission_json" in kargs and "submission_list" in kargs:
+            self.set_submission(kargs["next_mission_json"],kargs["submission_list"])
     
     def compatibility_check(self, submission2):
         return True
@@ -26,6 +30,9 @@ class submission():
         self.type_dict = type_dict
     
     def set_submission(self,next_mission_json,submission_list):
+        
+        self.config_json = next_mission_json
+        
         if "类型" in next_mission_json:
             self.type_str = next_mission_json["类型"]
             self._init_type(self.type_str)
@@ -39,8 +46,13 @@ class submission():
             self.set_direction(direction,self.type_str)
         
         if "参加单位" in next_mission_json:
-            self.force_arrange = next_mission_json["参加单位"]
+            force_arrange_str = next_mission_json["参加单位"]
             # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
+            self.force_arrange = self.arrange_force(force_arrange_str)
+        
+        self.arrange_time(submission_list)
+        
+        self.flag_well_defined = self.check_well_define()
     
     def set_direction(self,direction,submission_type):
         # 大模型给出的方向是高度抽象化的，需要转换成具体的坐标
@@ -52,7 +64,23 @@ class submission():
             else:
                 raise Exception("invalid direction")
         
-            
+    def arrange_force(self, force_arrange_str):
+        # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
+        print("unfinished yet, submission.arrange_force")
+        return force_arrange_str
+    
+    def arrange_time(self,submission_list):
+        # TODO: 整一个阳间的时间分配，要考虑为不同的单位都维护一个“当前任务都分配到啥时候了”，因为很可能不同单位的任务是异步的。
+        geshu = len(submission_list) 
+
+        self.time_arrange=[geshu*1000, (geshu+1)*1000]
+
+        print("unfinished yet, submission.arrange_time")
+    
+    def check_well_define(self):
+        print("unfinished yet, submission.check_well_define")
+        return True
+
 
 # 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
 # submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]
