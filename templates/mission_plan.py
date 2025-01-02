@@ -54,6 +54,30 @@ class mission_plan():
         time_arranged = self.submission_list[-1].time_arrange[1]
         force_arranged = self.submission_list[-1].force_arrange
         
-        waiting_prompt = "在"+str(time_arranged)+"帧之前的决策业已完成，你作为决策者，接下来需要在考虑敌方可能应对的同时做出决策。"
+        # 这里好好地搞一下，仅计算时间最新的，时间最新的里面的单位情况。
+        time_arranged_max = 0
+        for submission in self.submission_list:
+            time_arranged = submission.time_arrange[1] 
+            if time_arranged > time_arranged_max:
+                time_arranged_max = time_arranged
+
+        # 最大时间出来之后，再来看装备情况。
+        force_arranged_list = [] 
+        for submission in self.submission_list:
+            time_arranged = submission.time_arrange[1]
+            if time_arranged == time_arranged_max:
+                force_arranged_list.append(submission.force_arrange)
+
+        # 然后是根据不同的安排情况来看，到底是还有哪些东西没有安排。
+        force_prompt = "在"+str(time_arranged_max)+"帧之前，"
+        for unit_type_single in unit_type:
+            if unit_type_single not in force_arranged_list:
+                if unit_type_single == "坦克和自行迫榴炮":
+                    force_prompt += "尚未为坦克和自行迫榴炮榴炮安排作战任务，应该充分发挥其火力优势，安排其掩护我方地面力量，打击敌方防线。\n"
+                elif unit_type_single == "无人机和巡飞弹":
+                    force_prompt += "尚未为无人机和巡飞弹，应该充分发挥其机动和侦察优势，根据态势预测安排其前出侦察。\n"
+                elif unit_type_single == "装甲车等其他地面力量":
+                    force_prompt += "尚未为装甲车安排作战任务，应该发挥其电子干扰、运输步兵的优势，为其他单位提供有效支援。\n"
+        waiting_prompt = "在"+str(time_arranged_max)+"帧之前的决策业已完成，你作为决策者，接下来需要在考虑敌方可能应对的同时做出决策。"
         return waiting_prompt
 

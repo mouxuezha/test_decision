@@ -5,10 +5,11 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import json
+import pickle
 
 from typing import Optional, Dict, List, Tuple, Callable
 from text_transfer.text_transfer import *
-from templates.submision import submission, submission_type_list
+from templates.submision import *
 from model_communication.model_comm_langchain import ModelCommLangchain
 
 class DeLLMa():
@@ -19,7 +20,44 @@ class DeLLMa():
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
         self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none")
-        self.config_assist = {} # 这个用来实现一些边缘的功能
+        
+        self.set_config_assist()
+    
+    def set_config_assist(self):
+        self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。
+
+        self.config_assist["num_saved"] = 1 # 在这么多步及其之前，是从储存里直接去读取的，之后是和大模型互动生成
+        self.config_assist["jieguo_location"] = r"auto_test\jieguo_DeLLMa.pkl"
+        try:
+            self.load_jieguo()
+        except:
+            self.config_assist["jieguo"] = {}
+            self.config_assist["jieguo"]["state_str_list"] = [] 
+            self.config_assist["jieguo"]["utility_str_list"] = []     
+
+    def save_jieguo(self):
+        location = self.config_assist["jieguo_location"]
+        pickle.dump(self.config_assist["jieguo"],open(location,"wb"))
+    
+    def load_jieguo(self):
+        location = self.config_assist["jieguo_location"]
+        self.config_assist["jieguo"] = pickle.load(open(location,"rb"))
+
+    def restore_jieguo(self,jieguo_str,model="state"):
+        if model == "state":
+            key_str_list = "state_str_list"
+            # self.config_assist["jieguo"]["state_str_list"].append(jieguo_str)
+        elif model == "utility":
+            key_str_list = "utility_str_list"
+            # self.config_assist["jieguo"]["utility_str_list"].append(jieguo_str)
+        
+        # 再做一个功能，前面有就前面的覆盖，前面的没有就append。这样就不会越存越多了。
+        try:
+            index = self.config_assist["num_round"]
+            self.config_assist["jieguo"][key_str_list][index] = jieguo_str
+        except:
+            self.config_assist["jieguo"][key_str_list].append(jieguo_str)
+
 
     def set_utility_prompt(self, utility_prompt: str):
         self.utility_prompt = utility_prompt
@@ -32,18 +70,18 @@ class DeLLMa():
 
         # 参加单位：
         # unit_type = ["坦克和自行迫榴炮", "无人机和巡飞弹", "所有地面装备"]
-        unit_type = ["坦克和自行迫榴炮", "所有地面装备"]
+        unit_type1 = unit_type
 
         # 出击方向
-        direction_list = ["偏东", "偏西"]
+        direction_list1 = unit_type
 
         #子任务类型：
         submission_type_list1 = submission_type_list
 
         # 然后来个巨大的循环
         action_choice = [] 
-        for unit_type in unit_type:
-            for direction in direction_list:
+        for unit_type in unit_type1:
+            for direction in direction_list1:
                 for submission_type in submission_type_list1:
                     action_str = "类型：" + submission_type + "，参加单位：" + unit_type + "，出击方向：" + direction
                     flag_pass = self.check_action_choice(unit_type,submission_type)
@@ -124,19 +162,23 @@ class DeLLMa():
         belief_list_str = self.text_transfer.prepare_belief_prompt()
 
         state_enumeration_prompt = context + state_str
-        state_enumeration_prompt += "\n 每个键都应该映射到一个有3个键的JSON对象，每个键都是一个描述状态变量的字符串。这些键应该包含状态变量最可能的三个取值，每个键应该映射到你对它的信度，以自然语言表示。如果这些变量是连续变量，你应该将它们离散成三种值。"
+        state_enumeration_prompt += "\n 每个键都应该映射到一个有3个键的JSON对象，每个键都是一个描述状态变量的字符串，不要包含注释。这些键应该包含状态变量最可能的三个取值，每个键应该映射到你对它的信度，以自然语言表示。如果这些变量是连续变量，你应该将它们离散成三种值。"
 
         state_enumeration_prompt += "你仅应该从以下列表中挑选信度的描述，" + belief_list_str + "例如，若其中一个状态变量是“敌方经度”，然后三个最可能的取值是“靠中间”、“偏西”、“偏东”，那么你的回复应该是如下格式：\n        {\n            \"敌方经度\" : {\n                \"靠中间\" : \"很可能\",\n                \"偏西\" : \"有点可能\",\n                \"偏东\" : \"不太可能\"\n            },\n        }"
 
         # 好，然后和大模型交互一圈，看看情况。这里其实应该已经算是forecasting了，
         # print(state_enumeration_prompt)
         # response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
-        response_str = text_DeLLMa_state
-        if self.config_assist["num_round"]>1:
+        # response_str = text_DeLLMa_state
+        if self.config_assist["num_round"]>=self.config_assist["num_saved"]:
             # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
-            response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
+            response_str = text_DeLLMa_state2
+            # response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
+        else:
+            response_str = self.config_assist["jieguo"]["state_str_list"][self.config_assist["num_round"]]
 
         # print(response_str)
+        self.restore_jieguo(response_str,model="state")
 
         # 然后处理成JSON再返回吧
         state_forecasting_json = self.text_transfer.get_json_from_str(response_str)
@@ -150,12 +192,14 @@ class DeLLMa():
 
         # 好，弄好之后和大模型互动一波，看看出来的东西是什么样。
         # response_str = self.model_communication.communicate_with_model(dellma_prompt)
-        response_str = text_DeLLMa_utility
-        if self.config_assist["num_round"]>1:
+        # response_str = text_DeLLMa_utility
+        if self.config_assist["num_round"]>=self.config_assist["num_saved"]:
             # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
             response_str = self.model_communication.communicate_with_model(dellma_prompt)
-
+        else:
+            response_str = self.config_assist["jieguo"]["utility_str_list"][self.config_assist["num_round"]]
         print(response_str)
+        self.restore_jieguo(response_str,model="utility")
 
         # 道理上到这里应该是转成JSON，然后根据如果侦测到什么态势，就改出相应的东西来？
 
@@ -211,6 +255,8 @@ class DeLLMa():
 
         state_forecasting_json = self.state_enumeration_and_forecasting(G="避免正面冲击敌防线")
         U_func_json,state_action_pair_list = self.U_func_elicitation(state_forecasting_json)
+
+        self.save_jieguo()
 
         # 然后是把它提提出来，决定好下一个任务是什么。
         next_mission_json = self.get_next_mission(U_func_json,state_action_pair_list)
