@@ -73,9 +73,17 @@ class submission():
         # TODO: 整一个阳间的时间分配，要考虑为不同的单位都维护一个“当前任务都分配到啥时候了”，因为很可能不同单位的任务是异步的。
         geshu = len(submission_list) 
 
-        self.time_arrange=[geshu*1000, (geshu+1)*1000]
+        # self.time_arrange=[geshu*1000, (geshu+1)*1000]
 
-        print("unfinished yet, submission.arrange_time")
+        # 好好搞搞。逻辑应该是，找到前面为当前装备的安排的最后一个任务的时间点是多少，然后再往后加一些。
+        for submission in submission_list:
+            if submission.force_arrange == self.force_arrange:
+                if self.time_arrange[0]< submission.time_arrange[0]:
+                    self.time_arrange[0] = submission.time_arrange[0]
+                    # 人家AI给写的这个好像更高明呀
+                    break
+        self.time_arrange[1] = self.time_arrange[0] + 1000 
+        # print("unfinished yet, submission.arrange_time")
     
     def check_well_define(self):
         print("unfinished yet, submission.check_well_define")

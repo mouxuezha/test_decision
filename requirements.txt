@@ -11,3 +11,5 @@ openai
 dashscope
 langchain-openai
 websocket-client
+
+python-docx

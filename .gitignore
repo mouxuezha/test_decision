@@ -11,6 +11,7 @@ overall_result.txt
 auto_test
 socket_communication/config.txt
 .env
+*.docx
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -11,7 +11,7 @@ from typing import Optional, Dict, List, Tuple, Callable
 from text_transfer.text_transfer import *
 from templates.submision import *
 from model_communication.model_comm_langchain import ModelCommLangchain
-
+from output_tools.output_docx import output_docx
 class DeLLMa():
     # 算了，和大模型互动的也闭环在这里面好了。
 
@@ -20,8 +20,14 @@ class DeLLMa():
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
         self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none")
+
+        self.unit_type = unit_type 
         
         self.set_config_assist()
+        
+        self.output_docx = output_docx()
+        self.output_docx.set_heading("劳动竞赛场景下任务分配尝试")
+        
     
     def set_config_assist(self):
         self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。
@@ -57,12 +63,17 @@ class DeLLMa():
             self.config_assist["jieguo"][key_str_list][index] = jieguo_str
         except:
             self.config_assist["jieguo"][key_str_list].append(jieguo_str)
+        
+        self.output_docx.set_jieguo(self.config_assist["jieguo"])
 
 
     def set_utility_prompt(self, utility_prompt: str):
         self.utility_prompt = utility_prompt
         pass 
-    
+
+    def get_planned_unit_type(self,planned_prompt):
+        self.unit_type = planned_prompt
+
     def get_action_choice(self):
         # 这个原则上得从库里面读取，现在嘛先不管了。
         
@@ -70,21 +81,23 @@ class DeLLMa():
 
         # 参加单位：
         # unit_type = ["坦克和自行迫榴炮", "无人机和巡飞弹", "所有地面装备"]
-        unit_type1 = unit_type
+        # unit_type1 = unit_type
+        # 新来一个机制，选过的就拿出去。保证每一次能够给所有的单位都选出足够的东西。
+        unit_type1 = self.unit_type
 
         # 出击方向
-        direction_list1 = unit_type
+        direction_list1 = direction_list
 
         #子任务类型：
         submission_type_list1 = submission_type_list
 
         # 然后来个巨大的循环
         action_choice = [] 
-        for unit_type in unit_type1:
+        for unit_type_single in unit_type1:
             for direction in direction_list1:
                 for submission_type in submission_type_list1:
-                    action_str = "类型：" + submission_type + "，参加单位：" + unit_type + "，出击方向：" + direction
-                    flag_pass = self.check_action_choice(unit_type,submission_type)
+                    action_str = "类型：" + submission_type + "，参加单位：" + unit_type_single + "，出击方向：" + direction
+                    flag_pass = self.check_action_choice(unit_type_single,submission_type)
                     if flag_pass:
                         action_choice.append(action_str)
         return action_choice
@@ -155,6 +168,10 @@ class DeLLMa():
         
         # 先定一下需要哪些维度，以及各个维度需要离散成什么。
         context = self.text_transfer.prepare_context()
+        if self.config_assist["num_round"] == 0:
+            # 那就把这堆东西存到docx里面去
+            self.output_docx.set_context(context)
+
         context += "这个过程中你需要做的第一步，是生成一个信度分布，描述敌我双方战场态势的可能状态。"
 
         state_discription = self.text_transfer.state_discription_dict
@@ -172,8 +189,8 @@ class DeLLMa():
         # response_str = text_DeLLMa_state
         if self.config_assist["num_round"]>=self.config_assist["num_saved"]:
             # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
-            response_str = text_DeLLMa_state2
-            # response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
+            # response_str = text_DeLLMa_state2
+            response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
         else:
             response_str = self.config_assist["jieguo"]["state_str_list"][self.config_assist["num_round"]]
 
@@ -204,6 +221,7 @@ class DeLLMa():
         # 道理上到这里应该是转成JSON，然后根据如果侦测到什么态势，就改出相应的东西来？
 
         U_func_json = self.text_transfer.get_json_from_str(response_str)
+        self.output_docx.set_ufunc_json(U_func_json)
         return U_func_json,state_action_pair_list
     
     def maximize_Utility(self, theta_j:str, a_i:str,U_theta_a_list:list):
