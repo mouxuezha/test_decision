@@ -32,7 +32,7 @@ class DeLLMa():
     def set_config_assist(self):
         self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。
 
-        self.config_assist["num_saved"] = 1 # 在这么多步及其之前，是从储存里直接去读取的，之后是和大模型互动生成
+        self.config_assist["num_saved"] = 2 # 在这么多步及其之前，是从储存里直接去读取的，之后是和大模型互动生成
         self.config_assist["jieguo_location"] = r"auto_test\jieguo_DeLLMa.pkl"
         try:
             self.load_jieguo()
@@ -233,8 +233,11 @@ class DeLLMa():
         # 这个就是给出下一步要执行什么样的子任务了。
 
         selected_str = U_func_json["decision"]
-
-        index_selected = int(self.text_transfer.cut_from_str(selected_str,'状态-动作对',"114514",model="infinite"))
+        try:
+            index_selected = int(self.text_transfer.cut_from_str(selected_str,'状态-动作对',"114514",model="infinite"))
+        except:
+            print("DeLLMa: get_next_mission fail, invalid selected_str.")
+            index_selected = 0 
 
         selected_state_action_pair = state_action_pair_list[index_selected]
 

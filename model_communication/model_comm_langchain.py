@@ -112,8 +112,11 @@ class ModelCommLangchain():
         self.cb = [TokenHandler(self.model_name, self.history_output_tokens)]
     
     def communicate_with_model(self, message):
-        self.save_txt(message)           
-        resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
+        self.save_txt(message)        
+        try:   
+            resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
+        except:
+            resp = {'response':"the API seems G. "}
         # resp = self.chain.invoke([HumanMessage(content=message)], config={"callbacks": self.cb})
         resp_str = resp['response']
         self.save_txt(resp_str)

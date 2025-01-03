@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from templates.mission_plan import mission_plan
+import pickle 
 
 class mission_arrange:
     def __init__(self, status="none", intent="none", prior_knowledge="none"):
@@ -19,7 +20,10 @@ class mission_arrange:
         next_submission = one_plan.decide_next_submission()
 
         # 然后继续，这次主要解决的是在已经生成了一部分的基础上，继续生成。主要需要改的是context部分。
-        for i in range(3):
+        time_now = one_plan.check_time()
+        while(time_now<4000):
+        # for i in range(3):
+            # 最理想的其实应该是检测submission的时间来决定是不是结束，以及更新那些东西。
             next_submission = one_plan.decide_next_submission()
 
         return one_plan
@@ -28,7 +32,33 @@ class mission_arrange:
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         pass
 
+    def save_one_plan(self,plan:mission_plan,name:str):
+        # 这个就是跑完一次存一下看看成色。
+        if ".pkl" in name:
+            pass 
+        else:
+            name = name + ".pkl"
+        location_one_plan = "auto_test/" + name 
+        with open(location_one_plan, 'wb') as f:
+            pickle.dump(plan, f)
+    
+    def load_one_plan(self,name:str):
+        # 这个是读取存下来的。
+        if ".pkl" in name:
+            pass 
+        else:
+            name = name + ".pkl"
+
+        location_one_plan = "auto_test/" + name
+        with open(location_one_plan, 'rb') as f:
+            plan = pickle.load(f)
+
+        return plan
+
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
     shishi = mission_arrange()
     jieguo1 = shishi.get_one_plan()
+    shishi.save_one_plan(jieguo1,"jieguo1")
+    jieguo2 = shishi.load_one_plan("jieguo1")
+    print("完事儿了一次，看看成色。")

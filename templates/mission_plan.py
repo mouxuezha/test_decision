@@ -37,6 +37,8 @@ class mission_plan():
         self.DeLLMa.output_docx.set_submission(self.submission_list)
         self.DeLLMa.output_docx.save_file()
 
+        print("mission_plan: finish one decision, next submission was determined, En Taro XXH.")
+
         return next_submission
     
     def get_planned_prompt(self):
@@ -53,6 +55,17 @@ class mission_plan():
             waiting_prompt, planned_unit_type = self.get_waiting_prompt()
             planned_prompt += waiting_prompt
             planned_prompt += "注意,需要尽量给我方所有单位都分配上合适的任务,不要留下闲置的单位。"
+        
+        # 然后来一段根据时间的情况来推测敌方动向的Prompt，以及我方战术提示的。这部分对标的其实是条令条例。
+        time =self.check_time()
+        planned_prompt += "根据当前时间"+str(time)+"帧，推测敌方动向如下: \n"
+        if time < 1002:
+            planned_prompt += "敌方从起始点出发，尚在向可能的预定阵地进行机动，我方需做出侦察，以根据情况选择合适作战方向。"
+        elif time < 3002:
+            planned_prompt += "敌方已经到达预定阵地，正在等待我方进攻，我方需做好进攻准备，进行火力试探。"
+        else:
+            planned_prompt += "敌方可能已经发现我方行动意图，并相应调整了布署，此时我方应该集结兵力，互相配合，尝试取得突破。"
+
             
         return planned_prompt, planned_unit_type
 
@@ -99,3 +112,14 @@ class mission_plan():
         waiting_prompt = force_prompt + "你作为决策者，接下来需要在考虑敌方可能应对的同时做出决策。"
         return waiting_prompt, planned_unit_type
 
+    def check_time(self):
+        # 从submission_list里面找到时间最大的那个，然后返回这个时间。
+        time_arranged_max = 0
+        for submission in self.submission_list:
+            time_arranged = submission.time_arrange[1]
+            if time_arranged > time_arranged_max:
+                time_arranged_max = time_arranged
+
+        # 其实如果前面顺利的话这里完全可以简化，就直接要最后一个就行了
+        # time_arranged_max = self.submission_list[-1].time_arrange[1]
+        return time_arranged_max

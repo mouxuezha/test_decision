@@ -341,20 +341,33 @@ class text_transfer(object):
         json_str = self.cut_from_str(input_str, "{", "}",model="json")
         json_str = self.del_note_from_str(json_str)
         json_str = "{" + json_str + "}"
-        json_jieguo = json.loads(json_str)
+        try:
+            json_jieguo = json.loads(json_str)
+        except:
+            print("text_transfer: json_str is not a valid json, please check the input_str")
+            json_jieguo = {} 
         return json_jieguo
     
     def del_note_from_str(self, input_str:str):
         str_qian = "//"
         str_hou = "\n"
+
+        str_qianhou_list = [] 
+        str_qianhou_list.append(["//","\n"])
+        str_qianhou_list.append(["（","）"])
+        str_qianhou_list.append(["(",")"])
         
         output_str = input_str
-        while(str_qian in output_str):
-            index_qian = output_str.find(str_qian)
-            sub_str = output_str[index_qian:]
-            index_hou = sub_str.find(str_hou)
-            sub_str2 = sub_str[0:index_hou]
-            output_str = output_str.replace(sub_str2, "") # 也行吧，AI给出来的这个写法比我想的似乎还舒服一些。
+        for str_qianhou in str_qianhou_list:
+            str_qian = str_qianhou[0]
+            str_hou = str_qianhou[1]
+        
+            while(str_qian in output_str):
+                index_qian = output_str.find(str_qian)
+                sub_str = output_str[index_qian:]
+                index_hou = sub_str.find(str_hou)
+                sub_str2 = sub_str[0:index_hou]
+                output_str = output_str.replace(sub_str2, "") # 也行吧，AI给出来的这个写法比我想的似乎还舒服一些。
 
         return output_str
     

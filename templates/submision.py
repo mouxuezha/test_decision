@@ -61,11 +61,14 @@ class submission():
                 self.space_arrange = [100.164-0.001,13.658-0.007,100.164-0.003,13.658-0.005]
             elif direction == "偏西":
                 self.space_arrange = [100.116+0.001,13.643+0.007,100.116+0.003,13.643+0.005]
+            elif direction == "中间": 
+                self.space_arrange = [100.137+0.001,13.644+0.007,100.137+0.003,13.644+0.005]
             else:
                 raise Exception("invalid direction")
         
     def arrange_force(self, force_arrange_str):
         # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
+        # 2025年1月2日20:07:56，现在这样倒是也能和后面连起来，没啥不行的也。
         print("unfinished yet, submission.arrange_force")
         return force_arrange_str
     
@@ -78,11 +81,11 @@ class submission():
         # 好好搞搞。逻辑应该是，找到前面为当前装备的安排的最后一个任务的时间点是多少，然后再往后加一些。
         for submission in submission_list:
             if submission.force_arrange == self.force_arrange:
-                if self.time_arrange[0]< submission.time_arrange[0]:
-                    self.time_arrange[0] = submission.time_arrange[0]
-                    # 人家AI给写的这个好像更高明呀
+                if self.time_arrange[0]< submission.time_arrange[1]:
+                    self.time_arrange[0] = submission.time_arrange[1]
                     break
         self.time_arrange[1] = self.time_arrange[0] + 1000 
+        # 这里加多少就是一个任务分配多长的帧数。
         # print("unfinished yet, submission.arrange_time")
     
     def check_well_define(self):
@@ -92,9 +95,9 @@ class submission():
 
 # 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
 # submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]
-submission_type_list = ["none","陆地进攻","空中侦察"] # 来个简化版的不然太多了    
+submission_type_list = ["none", "陆地进攻", "空中侦察"] # 来个简化版的不然太多了    
 # unit_type = ["坦克和自行迫榴炮", "无人机和巡飞弹", "所有地面装备"]
 unit_type = ["坦克和自行迫榴炮", "装甲车等其他地面力量", "无人机和巡飞弹"]
 
 # 出击方向
-direction_list = ["偏东", "偏西"]    
+direction_list = ["偏东", "中间", "偏西"]    
