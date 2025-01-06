@@ -84,3 +84,16 @@ class StagePrompt:
         elif self.stage_now == "默认":
             prompt = prompt+ "请命令所有地面部队向夺控点机动，在夺控点附近分散布防"
         return prompt        
+
+    def get_stage_prompt_plan(self, index):
+        # 这个是服务于多方案生成的，根据index提供一些差异化的提示词看看能不能给出一些不一样的方案来。
+        plan_prompt = ""
+        if index == 0:
+            plan_prompt = "请先进行试探，避免正面冲击敌防线，然后再发起进攻。命令我方地面单位沿地图东侧推进，自行迫榴炮占据有利射击位置，无人机和巡飞弹前出至建筑物附近侦察。随着推演进行，基本摸清敌方动向之后地面部队向北突击，进攻对方防线薄弱位置，并在削弱敌方防御之后尝试占领夺控点。"
+        elif index == 1:
+            plan_prompt = "请尽快完成作战任务，占领夺控点。为达成此目的，可接受一定程度的损失，直接从正面展开进攻。无人机和巡飞弹适当深入敌方设防区域，尽早确定敌方动向。"
+        elif index == 2:
+            plan_prompt = "请以保存自身实力为主，广泛进行侦察，沿着敌方防线寻找敌方防线的薄弱点进行试探，若无十足把握则不要轻易进攻。命令我方地面单位沿地图西面前出，自行迫榴炮占据有利射击位置，无人机和巡飞弹侦察监控地面部队周围区域，并为炮火提供引导。"
+        
+        print("get_stage_prompt_plan: unfinished yet.")
+        return plan_prompt

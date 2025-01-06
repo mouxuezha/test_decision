@@ -25,7 +25,8 @@ class mission_arrange:
         # for i in range(3):
             # 最理想的其实应该是检测submission的时间来决定是不是结束，以及更新那些东西。
             next_submission = one_plan.decide_next_submission()
-
+        
+        self.save_one_plan(one_plan,"jieguo1")
         return one_plan
     
     def main_loop(self):
