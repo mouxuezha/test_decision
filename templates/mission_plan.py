@@ -13,6 +13,11 @@ class mission_plan():
         self.force_arrange = [] 
         self.submission_list = []
         self.DeLLMa = DeLLMa()
+    
+    def set_users_goal(self, G:str):
+        # 这个是用来对某个任务设定目标的。明确:论文里的users goal G和这里代码里的target str，道理上就是一回事儿。
+        self.target_str = G
+        print("mission_plan: set users goal to: \n", G)
 
     def compatibility_check(self, submission_list):
         # 这个是检测整个任务序列是否合法，别有各种冲突。至于检测规则可以后面慢慢加。
@@ -29,7 +34,7 @@ class mission_plan():
         self.DeLLMa.get_planned_unit_type(planned_unit_type)
 
         # 这个是决定下一个要执行的任务。
-        next_mission_json = self.DeLLMa.one_round()
+        next_mission_json = self.DeLLMa.one_round(user_goal=self.target_str)
 
         # 设定好下一步的，然后得给出决策还没决策圆的地方
         next_submission = submission(next_mission_json=next_mission_json,submission_list=self.submission_list)
@@ -110,6 +115,10 @@ class mission_plan():
                         force_prompt += "尚未为装甲车等其他地面力量安排作战任务，应该发挥其电子干扰、运输步兵的优势，为其他单位提供有效支援。\n"
                         planned_unit_type.append(unit_type_single) # 复制代码很是丑陋，但是不管了，无所谓了呵呵。
         waiting_prompt = force_prompt + "你作为决策者，接下来需要在考虑敌方可能应对的同时做出决策。"
+        
+        if len(planned_unit_type) == 0:
+            planned_unit_type = unit_type
+            print("按说不应该运行到这里，看看哪儿出问题了。")
         return waiting_prompt, planned_unit_type
 
     def check_time(self):

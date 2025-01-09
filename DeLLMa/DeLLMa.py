@@ -266,15 +266,20 @@ class DeLLMa():
 
         return DeLLMa_prmpt,state_action_pair_list
 
-    def one_round(self):
+    def one_round(self,**kargs):
         if "num_round" in self.config_assist:
             self.config_assist["num_round"] += 1
         else:
             self.config_assist["num_round"]  = 0 
 
+        if "user_goal" in kargs:
+            G = kargs["user_goal"]
+        else:
+            G = "避免正面冲击敌防线"
+
         # 别再叠床架屋了，这里直接给他冲了。这个要返回的是，下一个子任务是是什么。先别管多步的，先把一步的做了再说。
 
-        state_forecasting_json = self.state_enumeration_and_forecasting(G="避免正面冲击敌防线")
+        state_forecasting_json = self.state_enumeration_and_forecasting(G=G)
         U_func_json,state_action_pair_list = self.U_func_elicitation(state_forecasting_json)
 
         self.save_jieguo()

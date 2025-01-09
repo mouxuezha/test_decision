@@ -480,6 +480,12 @@ class text_transfer(object):
                 state_action_pair_single["action"] = action
                 state_action_list.append(state_action_pair_single)
         # print(pair_str)
+        
+        # 为了防止后面报错，这里做一个兼容，就是如果循环完了都没有list，那么list里面补充一个空的。
+        if len(state_action_list)==0:
+            state_action_list.append({"state":"","action":""})
+            print("这种情况按说不应该出现，查查为啥。")
+
         return pair_str, state_action_list
     
     def prepare_belief_prompt(self):
