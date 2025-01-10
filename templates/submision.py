@@ -83,15 +83,23 @@ class submission():
             if submission.force_arrange == self.force_arrange:
                 if self.time_arrange[0]< submission.time_arrange[1]:
                     self.time_arrange[0] = submission.time_arrange[1]
-                    break
-        self.time_arrange[1] = self.time_arrange[0] + 1000 
+        self.time_arrange[1] = self.time_arrange[0] + 2000 
         # 这里加多少就是一个任务分配多长的帧数。
         # print("unfinished yet, submission.arrange_time")
     
     def check_well_define(self):
         print("unfinished yet, submission.check_well_define")
         return True
-
+    
+    def check_equal(self, next_submission):
+        # check一下两个submission是不是一样。
+        flag = True
+        flag = flag and (self.type_str == next_submission.type_str)
+        flag = flag and (self.force_arrange == next_submission.force_arrange)
+        flag = flag and (self.time_arrange == next_submission.time_arrange)
+        
+        # 这几个相等就认为是相等了。
+        return flag
 
 # 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
 # submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]

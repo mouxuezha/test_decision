@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from templates.mission_plan import mission_plan
 from text_transfer.stage_prompt import StagePrompt
 import pickle 
+import dill 
 
 class mission_arrange:
     def __init__(self, status="none", intent="none", prior_knowledge="none"):
@@ -40,15 +41,19 @@ class mission_arrange:
         # 要是后面要搞人机交互的话，就是在每一次decide前加一些读取命令、操作submissionlist的东西。
         next_submission = one_plan.decide_next_submission()
       
-        # 然后继续，这次主要解决的是在已经生成了一部分的基础上，继续生成。主要需要改的是context部分。
-        time_now = one_plan.check_time()
-        while(time_now<4000):
+        time_now = 0 
+        while(time_now<5000):
+            # 然后继续，这次主要解决的是在已经生成了一部分的基础上，继续生成。主要需要改的是context部分。
+            time_now = one_plan.check_time()
         # for i in range(3):
             # 最理想的其实应该是检测submission的时间来决定是不是结束，以及更新那些东西。
             next_submission = one_plan.decide_next_submission()
+            # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
+            # 但是在调试的时候可以开了它，这样就容易给出结果。
+            # self.save_one_plan(one_plan,"jieguo"+str(self.index))
         
         self.save_one_plan(one_plan,"jieguo"+str(self.index))
-
+        self.plan_list.append(one_plan)
         return one_plan
     
     def main_loop(self, plan_num = 3):
@@ -66,9 +71,16 @@ class mission_arrange:
         else:
             name = name + ".pkl"
         location_one_plan = "auto_test/" + name 
-        self.plan_list.append(plan)
+        # docx那个不能序列化，所以还得想办法改改。
+        try:
+            plan.DeLLMa.output_docx = "为了保存整个对象，docx功能先关了。"
+        except:
+            pass
+
+        # 如果有同名文件存在就覆盖。但是现在本来就是覆盖了应该。
+        # self.plan_list.append(plan) # 不要搞功能嵌套，这个放到外面去
         with open(location_one_plan, 'wb') as f:
-            pickle.dump(plan, f)
+            dill.dump(plan, f)
     
     def load_one_plan(self,name:str):
         # 这个是读取存下来的。
@@ -79,7 +91,7 @@ class mission_arrange:
 
         location_one_plan = "auto_test/" + name
         with open(location_one_plan, 'rb') as f:
-            plan = pickle.load(f)
+            plan = dill.load(f)
 
         return plan
 

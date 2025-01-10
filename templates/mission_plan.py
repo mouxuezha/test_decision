@@ -38,7 +38,14 @@ class mission_plan():
 
         # 设定好下一步的，然后得给出决策还没决策圆的地方
         next_submission = submission(next_mission_json=next_mission_json,submission_list=self.submission_list)
-        self.submission_list.append(next_submission)
+        # 做一个容错，如果和前面一个完全一样，那就不append了。
+        if len(self.submission_list)>0:
+            if next_submission.check_equal(self.submission_list[-1]):
+                # 估计得重新写一个判断等于函数
+                raise Exception("任务生成的有问题，这个就不应该放进去。")
+            self.submission_list.append(next_submission)
+        else:
+            self.submission_list.append(next_submission)
         self.DeLLMa.output_docx.set_submission(self.submission_list)
         self.DeLLMa.output_docx.save_file()
 
@@ -97,7 +104,7 @@ class mission_plan():
         # 然后是根据不同的安排情况来看，到底是还有哪些东西没有安排。
         force_prompt = "在"+str(time_arranged_max)+"帧之前，"
         
-        if len(unit_type) == len(force_arranged_list):
+        if len(unit_type) <= len(force_arranged_list):
             # 那就是都安排全了，可以安排下一个时间节点的了。
             force_prompt += "所有单位都已经安排完毕，可以安排下一个时间节点的作战任务了。"
             planned_unit_type = unit_type
@@ -123,12 +130,29 @@ class mission_plan():
 
     def check_time(self):
         # 从submission_list里面找到时间最大的那个，然后返回这个时间。
+        # 原来的简单逻辑有问题，因为正常情况下会有好几个子任务是最后同一个时间结束。
+        # 干脆再来一轮check同样的个数好了，反正总共也没几个子任务，计算开销不大
         time_arranged_max = 0
+        time_arranged_max2 = 0 
         for submission in self.submission_list:
             time_arranged = submission.time_arrange[1]
             if time_arranged > time_arranged_max:
                 time_arranged_max = time_arranged
+                time_arranged_max2 = submission.time_arrange[0]
+        
+        # 然后来一个检测有几个子任务是这个时间段的。
+        # num_repeat = 3 # 这个设定为一个可调的阈值好了，其实是取决于有几个兵种。
+        num_repeat = len(unit_type)
+        num_repeat_here = 0 
+        for submission in self.submission_list:
+            if submission.time_arrange[1] == time_arranged_max:
+                # 那就计数加一
+                num_repeat_here += 1
+        if num_repeat_here >= num_repeat:
+            # 那就说明都安排好了，可以安排下一个时间节点了。
+            pass
+        else:
+            # 那就说明这个时间点还没安排好，需要继续安排。
+            time_arranged_max = time_arranged_max2
 
-        # 其实如果前面顺利的话这里完全可以简化，就直接要最后一个就行了
-        # time_arranged_max = self.submission_list[-1].time_arrange[1]
         return time_arranged_max

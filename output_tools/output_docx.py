@@ -73,5 +73,8 @@ class output_docx():
             self.document.add_paragraph(state_shuofa_str)
 
             # 然后是utility函数的那个
-            utilitys_shuofa_str = self.text_dict["ufunc_json_list"][i]["explanation"]
+            try:
+                utilitys_shuofa_str = self.text_dict["ufunc_json_list"][i]["explanation"]
+            except:
+                utilitys_shuofa_str = ""
             self.document.add_paragraph(utilitys_shuofa_str)

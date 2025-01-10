@@ -232,7 +232,12 @@ class DeLLMa():
     def get_next_mission(self, U_func_json,state_action_pair_list):
         # 这个就是给出下一步要执行什么样的子任务了。
 
-        selected_str = U_func_json["decision"]
+        
+        try:
+            selected_str = U_func_json["decision"]
+        except:
+            selected_str = ""
+
         try:
             index_selected = int(self.text_transfer.cut_from_str(selected_str,'状态-动作对',"114514",model="infinite"))
         except:
