@@ -18,6 +18,9 @@ class mission_plan():
         # 这个是用来对某个任务设定目标的。明确:论文里的users goal G和这里代码里的target str，道理上就是一回事儿。
         self.target_str = G
         print("mission_plan: set users goal to: \n", G)
+    
+    def set_config_mission_plan(self,**kargs):
+        self.DeLLMa.set_config_assist(**kargs)
 
     def compatibility_check(self, submission_list):
         # 这个是检测整个任务序列是否合法，别有各种冲突。至于检测规则可以后面慢慢加。

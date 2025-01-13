@@ -29,11 +29,21 @@ class DeLLMa():
         self.output_docx.set_heading("劳动竞赛场景下任务分配尝试")
         
     
-    def set_config_assist(self):
+    def set_config_assist(self,**kargs):
         self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。
 
-        self.config_assist["num_saved"] = 2 # 在这么多步及其之前，是从储存里直接去读取的，之后是和大模型互动生成
-        self.config_assist["jieguo_location"] = r"auto_test\jieguo_DeLLMa.pkl"
+        
+        if "num_saved" in kargs:
+            self.config_assist["num_saved"] = kargs["num_saved"]
+        else:
+            self.config_assist["num_saved"] = 0 # 在这么多步及其之前，是从储存里直接去读取的，之后是和大模型互动生成
+        print("DeLLMa: num_saved="+str(self.config_assist["num_saved"]))
+
+        if "jieguo_location" in kargs:
+            self.config_assist["jieguo_location"] = kargs["jieguo_location"]
+        else:
+            self.config_assist["jieguo_location"] = r"auto_test\jieguo_DeLLMa.pkl"
+            
         try:
             self.load_jieguo()
         except:

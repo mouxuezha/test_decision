@@ -28,6 +28,8 @@ class mission_arrange:
             self.index = kargs["index"]
         else:
             self.index = 0
+        
+
 
         # 在这里实现模块2的具体逻辑，根据参数生成出一个方案，返回一个方案对象。
         one_plan = mission_plan()
@@ -36,6 +38,14 @@ class mission_arrange:
         if len(users_goal)>1:
             # 那就是里面有东西。
             one_plan.set_users_goal(users_goal)
+        if self.index == 0:
+            num_saved = 6 
+        else:
+            num_saved = 0
+        
+        jieguo_location = r"auto_test\jieguo_DeLLMa" + str(self.index) + r".pkl"
+        
+        one_plan.set_config_mission_plan(num_saved=num_saved, jieguo_location =jieguo_location) # 设定一些不从0开始计算的机制。
 
         # 好，先把DeLLMa润起来看Prompt好了，冲就完事儿了。
         # 要是后面要搞人机交互的话，就是在每一次decide前加一些读取命令、操作submissionlist的东西。
@@ -60,6 +70,7 @@ class mission_arrange:
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
         for index in range(plan_num):
+            index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
             users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
         pass
