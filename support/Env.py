@@ -90,9 +90,10 @@ class Env():
         return result
 
 class Env_server():
-    def __init__(self,IP, port) -> None:
+    def __init__(self,IP, port, seat = "commandor") -> None:
         self.set_IP_and_port(IP, port)
         self.received_str = "None"
+        self.seat = seat
         pass
     def set_IP_and_port(self,IP,port):
         # 这个还是跑不了的，设定一下自己到底是什么IP什么端口号。
