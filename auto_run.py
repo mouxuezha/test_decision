@@ -4,6 +4,8 @@ from templates.commands import command_transfer
 from mission_arrange.mission_arrange import mission_arrange
 from text_transfer.text_transfer import text_transfer
 import argparse, queue, time,threading
+from concurrent.futures import ThreadPoolExecutor
+import time
 
 class auto_run_comunicator():
     # 还是那个路数，开个进程一直转着，看GUI那头有什么东西发过来。发过来的先缓存着，然后每隔一段时间处理一次。
@@ -17,16 +19,19 @@ class auto_run_comunicator():
         self.flag_debug = False
         self.config = {} 
 
-        self.mission_arrange = mission_arrange() 
+        
         self.text_transfer = text_transfer()
 
         self.commands_queue = queue.Queue(114514)
         self.send_queue = queue.Queue(114514) # 干脆上来先打好基础，发送的专门整个消息队列好了，不然不是就乱了嘛。
         # 感叹一句，再往下是不是就要来线程锁什么的了。
         self.receive_queue = queue.Queue(114514) # 接收过来的先不解析，先存着一下。
+        # 直接快进一波，直接快进到线程池处理各种handle。
+        self.handle_threadpool = ThreadPoolExecutor(max_workers=10)
 
         self.command_transfer = command_transfer()
-
+        
+        self.running_result = {} # 这个用来存那些个运行出来的中间结果，都是“有就用现成的，没有就现算一个或者没有就现读取一个”的逻辑
         pass
 
     def __init_envs(self):
@@ -83,7 +88,7 @@ class auto_run_comunicator():
         while(True):
             time.sleep(1.14514)
             for seat in self.env_dict.keys():
-                gui_order_str = self.env_dict[seat].receive_str()
+                gui_order_str = self.env_dict[seat].receive_str() # 所有席位的全都收一遍。
                 # 从方便调试的角度考虑，接收进来应该先放队列，然后再统一处理
                 gui_order_dict = {seat:gui_order_str}
                 self.receive_queue.put(gui_order_dict)
@@ -108,40 +113,80 @@ class auto_run_comunicator():
                 receive_dict_single = self.receive_queue.get()
                 receive_str = receive_dict_single.value()
                 receive_seat = receive_dict_single.key()
-                flag_pass = self.check_seat_expedient(receive_seat,receive_seat)
+                
+                # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
+                self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
+        
+        # 这里搞个线程池。看起来就很丝滑了。任务调起来是一回事，执行成什么样子嘛再说可也
+
 
         pass
 
     def get_command(self):
         # 这个就是从GUI那边拿指令的。每一步执行一次的，收命令过来弄到队列里面去。
+        # 直接卸载run single 里面了，总共没几行。
         pass
 
     def send_response(self,response_str:str):
-        # 这次在后端就分开，显示的命令是显示的命令，增加点儿掌控力.
+        # 这次在后端就分开，显示的命令是显示的命令，增加点儿掌控力.这个是通用的入队列的说法。
+        # 这里所谓发送，其实就是放进队列里面去的意思嘛。发回去的就不用分什么席位了。
+        self.send_queue.put(response_str)
         pass 
 
     def send_plan(self,new_plans:list):
         # 把多方案解析解析，给GUI发过去。
+        
+        # 然后把方案弄出来,然后准备发过去。
+        plans_str = self.text_transfer.plan_list_to_str(new_plans)
+        self.running_result["Planning_str"] = plans_str
+        # 组合一下报文
+        plans_str = self.command_transfer.arrange_communication()
+
+        self.send_response("Plans", plans_str)
+
+        # 后面如果要有别的办法来传结构化数据，那就都是在这个函数里面拓展。
+
         pass
 
     def send_evaluate(self, pinggu):
         # 给GUI发个评估结果。
         pass
 
-    def handle_command_expedient(self,command):
+    def handle_command_expedient(self,seat,command):
         # 也是权宜之计。这个就是执行一条完整的指令，比如一次方案编辑，之类的。其实是在为后面做准备了有点儿.
         # 这个和收信息那个应该放在不同的线程。
+        flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
+        if flag_pass:
+            # 那就是鉴权通过了，认为是合法的。
+            if command_type == "方案编辑":
+                # 那就是当前这条命令是方案编辑的。
+                # 原则上这里应该来线程池了，大点儿的指令就专门给它开个线程，小的就不开了。
+                mission_arrange_single = mission_arrange() 
+                plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                self.send_plan(plan_list)
+                self.running_result["Planning"] = plan_list
+            elif command_type == "方案评估":
+                pass 
+            else:
+                print("handle_command_expedient：当前命令类型尚未定义命令处理流程")
+
         pass
 
     def check_seat_expedient(self, seat, command:str ):
         # 权宜之计。鉴权的说法。
-        search_key = self.seat_access[seat]
-        flag_pass = True
-        if command.find(search_key)>0:
-            # 那就认为是合法的。
+        try:
+            search_key = self.seat_access[seat]
             flag_pass = True
-        else:
-            flag_pass = False
-        return flag_pass
+            if command.find(search_key)>0:
+                # 那就认为是合法的。
+                flag_pass = True
+            else:
+                flag_pass = False
+            command_type = search_key
+        except:
+            # 那就是没有找到，没有合适的鉴权的说法
+            command_type = "未定义"
+            # 这里不要硬性报错了，不然跑着跑着卡一下还是比较尴尬的。
+        return flag_pass, command_type
 
   

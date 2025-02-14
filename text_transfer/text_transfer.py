@@ -525,6 +525,11 @@ class text_transfer(object):
 
         return preference_prompts
 
+    def plan_list_to_str(self,plan_list:list):
+        # 这个是想一个转换的方式把方案给过去。
+        print("plan_list_to_str: unfinished yet")
+        return "plan_list_to_str debug str here"
+
 class type_transfer(object):
     # 这个是用来把抽象的装备类型化简一下的，搞成中文的。
     def __init__(self):

@@ -73,7 +73,9 @@ class mission_arrange:
             index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
             users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
+            self.plan_list.append(jieguo)
         pass
+        return self.plan_list
 
     def save_one_plan(self,plan:mission_plan,name:str):
         # 这个就是跑完一次存一下看看成色。
