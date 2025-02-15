@@ -141,4 +141,26 @@ class Env_server():
             self.flag_new = False
 
         return self.received_str
-      
+
+class Env_server_debug():
+    # 用于调试的，print到文件里面，就避免网络通信了。
+    def __init__(self,IP, port, seat = "commandor") -> None:
+        self.text_location = "auto_text/Env_server_debug.txt"
+    
+    def init_socket(self):
+        pass 
+
+    def send_str(self,status_str:str):
+        # 输出到文件里面去。
+        with open(self.text_location, 'a') as f:
+            f.write(status_str)
+            f.write("\n")
+        print("send_str: " + status_str)
+        pass 
+    def receive_str(self):
+        # 返回一点随便什么东西。
+        return_str = "Env_server_debug.receive_str:  调试中，放一系列关键词在这儿方便检索。态势评估，装备编辑，子任务编辑，历史方案编辑，root，方案编辑，方案评估"
+        return return_str
+    
+    def Step(self, Action=None):
+        pass 

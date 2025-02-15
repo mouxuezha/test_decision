@@ -17,7 +17,9 @@ class auto_run_comunicator():
         
         self.flag_init = True # 这个用来标记当前是不是第一步。
         self.flag_debug = False
-        self.config = {} 
+        self.config_dict = {}
+        
+        self.config_dict["flag_exit"] = False # 这个用来标志运行中是不是需要退出了
 
         
         self.text_transfer = text_transfer()
@@ -36,10 +38,12 @@ class auto_run_comunicator():
 
     def __init_envs(self):
         self.env_dict = {} 
-        net_args = self.__init_net(ip = "127.0.0.1", port = 30001)
+        self.net_args = self.__init_net(ip = "127.0.0.1", port = 30001)
         self.max_episode_len = self.net_args.max_episode_len
         # self.env = Env(self.net_args.ip, self.net_args.port)
-        env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
+        print("auto_run_comunicator: 绑定席位和IP地址...")
+        # env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
+        env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor")
         self.env_dict["commandor"] = env_single
         print("__init_envs: unfinished yet")
 
@@ -79,6 +83,22 @@ class auto_run_comunicator():
         thread3.start()
 
         print("auto_run_communicator: successfully started, wuhu, qifei")    
+
+        # 主进程得整个东西看住了，不然主进程直接结束了反而别的就结束了。现在这个是主进程了。
+        # thread1.join()
+        # thread2.join()
+        # thread3.join()
+        # 换个方案，允许强制退出。
+        flag_temp = True
+        while(flag_temp):
+            time.sleep(1.14514)
+            print("auto_run_communicator:running...")
+            if self.config_dict["flag_exit"] == False:
+                # 那就是无事发生。
+                pass
+            else:
+                # 那就是从某处得到了要退出的说法，那就退出。
+                flag_temp = False
         pass 
 
     def run_single_receive(self):
@@ -111,11 +131,11 @@ class auto_run_comunicator():
         while(True):
             if not self.receive_queue.empty():
                 receive_dict_single = self.receive_queue.get()
-                receive_str = receive_dict_single.value()
-                receive_seat = receive_dict_single.key()
+                receive_str = list(receive_dict_single.values())[0]
+                receive_seat = list(receive_dict_single.keys())[0]
                 
-                # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
-                self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
+                self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
+                # self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
         
         # 这里搞个线程池。看起来就很丝滑了。任务调起来是一回事，执行成什么样子嘛再说可也
 
@@ -158,11 +178,13 @@ class auto_run_comunicator():
         flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
         if flag_pass:
             # 那就是鉴权通过了，认为是合法的。
-            if command_type == "方案编辑":
-                # 那就是当前这条命令是方案编辑的。
+            if (command_type == "方案生成") or (command_type == "root"):
+                # 那就是当前这条命令是方案生成的。
                 # 原则上这里应该来线程池了，大点儿的指令就专门给它开个线程，小的就不开了。
+                print("handle_command_expedient： 方案生成")
                 mission_arrange_single = mission_arrange() 
-                plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                # plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                plan_list = mission_arrange_single.main_loop_debug(plan_num = 3)
                 self.send_plan(plan_list)
                 self.running_result["Planning"] = plan_list
             elif command_type == "方案评估":
@@ -175,18 +197,27 @@ class auto_run_comunicator():
     def check_seat_expedient(self, seat, command:str ):
         # 权宜之计。鉴权的说法。
         try:
-            search_key = self.seat_access[seat]
-            flag_pass = True
-            if command.find(search_key)>0:
-                # 那就认为是合法的。
-                flag_pass = True
-            else:
-                flag_pass = False
+            search_key_list  = self.seat_access[seat]
+            for search_key in search_key_list:
+                if search_key == "root":
+                    flag_pass = True
+                    break
+                else:
+                    if command.find(search_key)>0:
+                        # 那就认为是合法的。
+                        flag_pass = True
+                        break
+                    else:
+                        flag_pass = False
             command_type = search_key
         except:
             # 那就是没有找到，没有合适的鉴权的说法
             command_type = "未定义"
             # 这里不要硬性报错了，不然跑着跑着卡一下还是比较尴尬的。
         return flag_pass, command_type
+    
+if __name__ == "__main__":
+    shishi_run = auto_run_comunicator()
+    shishi_run.run_mul()
 
   

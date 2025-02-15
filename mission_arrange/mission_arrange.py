@@ -76,6 +76,17 @@ class mission_arrange:
             self.plan_list.append(jieguo)
         pass
         return self.plan_list
+    
+    def main_loop_debug(self, plan_num = 3):
+        # 这个是用来调试的.
+        name0 = "jieguo0"
+        plan0 = self.load_one_plan(name0)
+        for index in range(plan_num):
+            # 直接重复几次，复制几个就好了嘛
+            self.plan_list.append(plan0)
+
+        return self.plan_list
+
 
     def save_one_plan(self,plan:mission_plan,name:str):
         # 这个就是跑完一次存一下看看成色。

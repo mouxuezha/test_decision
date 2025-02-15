@@ -527,9 +527,52 @@ class text_transfer(object):
 
     def plan_list_to_str(self,plan_list:list):
         # 这个是想一个转换的方式把方案给过去。
+        geshu = len(plan_list)
+        plan_list_dict = {}
+        for i in range(geshu):
+            plan_single = plan_list[i]
+            if plan_single.id_str == "none":
+                # 那就改个名字。
+                plan_single.id_str = "方案" + str(i+1)
+            
+            # 真的开始提炼了。先搞成dict，再统一转好了。
+            plan_list_dict[plan_single.id_str] = self.plan_single_to_str(plan_single)
+
+
+        # 最后转成字符串拿出去，岂不美哉。
+        plan_list_str = json.dumps(plan_list_dict,ensure_ascii=False)
+        return plan_list_str
         print("plan_list_to_str: unfinished yet")
         return "plan_list_to_str debug str here"
+    
+    def plan_single_to_str(self,plan_single):
+        # 这个是想一个转换的方式把方案给过去。
+        plan_single_dict = {} 
+        plan_single_dict["id_str"] = plan_single.id_str
+        plan_single_dict["target_str"] = plan_single.target_str
+        plan_single_dict["submission_list_num"] = len(plan_single.submission_list)
+        for submission_single in plan_single.submission_list:
+            submission_single_dict = self.submission_single_to_str(submission_single)
+            submission_id = submission_single.id_str
+            plan_single_dict[submission_id] = submission_single_dict
 
+        return plan_single_dict
+    
+    def submission_single_to_str(self,submission_single):
+        # 这个是想一个转换的方式把方案给过去。每个子任务分别处理。
+        submission_single_dict = {} 
+        submission_single_dict["id_str"] = submission_single.id_str
+        submission_single_dict["target_str"] = submission_single.target_str
+        submission_single_dict["type_str"] = submission_single.type_str
+        submission_single_dict["time_arrange"] = submission_single.time_arrange
+        submission_single_dict["space_arrange"] = submission_single.space_arrange
+        submission_single_dict["force_arrange"] = submission_single.force_arrange
+        # submission_single_dict["space_arrange"] = submission_single.space_arrange
+        # submission_single_dict["space_arrange"] = submission_single.space_arrange
+        # submission_single_dict["space_arrange"] = submission_single.space_arrange
+        # submission_single_dict["space_arrange"] = submission_single.space_arrange
+
+        return submission_single_dict
 class type_transfer(object):
     # 这个是用来把抽象的装备类型化简一下的，搞成中文的。
     def __init__(self):
