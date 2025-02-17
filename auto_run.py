@@ -134,10 +134,14 @@ class auto_run_comunicator():
                 receive_str = list(receive_dict_single.values())[0]
                 receive_seat = list(receive_dict_single.keys())[0]
                 
-                self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
-                # self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
+                # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
+                # future = self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
+                future = self.handle_threadpool.submit(self.handle_command_expedient,receive_seat,receive_str) # 这个和threading不一样了，这个不用打括号了。
+                jieguo = future.result() # 猜测是得调用result的时候才会真的执行，所以只写上面那句不写这里这句的话它不太行
+
         
         # 这里搞个线程池。看起来就很丝滑了。任务调起来是一回事，执行成什么样子嘛再说可也
+
 
 
         pass
@@ -160,9 +164,9 @@ class auto_run_comunicator():
         plans_str = self.text_transfer.plan_list_to_str(new_plans)
         self.running_result["Planning_str"] = plans_str
         # 组合一下报文
-        plans_str = self.command_transfer.arrange_communication()
+        plans_str = self.command_transfer.arrange_communication(Action=plans_str,communication_type="Plans",)
 
-        self.send_response("Plans", plans_str)
+        self.send_response(plans_str)
 
         # 后面如果要有别的办法来传结构化数据，那就都是在这个函数里面拓展。
 
@@ -172,7 +176,7 @@ class auto_run_comunicator():
         # 给GUI发个评估结果。
         pass
 
-    def handle_command_expedient(self,seat,command):
+    def handle_command_expedient(self,seat="none",command="none"):
         # 也是权宜之计。这个就是执行一条完整的指令，比如一次方案编辑，之类的。其实是在为后面做准备了有点儿.
         # 这个和收信息那个应该放在不同的线程。
         flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权

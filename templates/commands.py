@@ -29,6 +29,12 @@ class command_transfer:
             raise Exception("communication_type is not valid")
         command = {"CMD": communication_type}
         if Action != None:
-            command.update(Action)
-        command_str = json.dumps(command)
+            if type(Action) == dict:
+                command.update(Action)
+            elif type(Action) == str:
+                command["Str"] = Action
+            else:
+                raise Exception("unfinished yet in arrange_communication: Action type is invalid")
+        # command_str = json.dumps(command)
+        command_str = str(command)
         return command_str

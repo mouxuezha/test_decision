@@ -145,7 +145,7 @@ class Env_server():
 class Env_server_debug():
     # 用于调试的，print到文件里面，就避免网络通信了。
     def __init__(self,IP, port, seat = "commandor") -> None:
-        self.text_location = "auto_text/Env_server_debug.txt"
+        self.text_location = "auto_test/Env_server_debug.txt"
     
     def init_socket(self):
         pass 
