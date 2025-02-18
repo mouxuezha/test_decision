@@ -70,7 +70,7 @@ class output_docx():
             self.document.add_heading(submission_single.id_str, level=3)
 
             # 然后参与的单位和时间啥的写一下
-            str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，辅助决策系统为" + submission_single.force_arrange + "分配了一个任务，命令其" + submission_single.type_str + "。"
+            str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，辅助决策系统为" + submission_single.force_arrange + "分配了一个任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
 
             self.document.add_paragraph(str_single)
 

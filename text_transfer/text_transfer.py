@@ -608,7 +608,7 @@ class text_transfer(object):
     def state_forcaste_to_str(self, state_forcaste:dict):
         # 这个是把state_forcaste转成字符串，面向输出，所以需要搞一些
         # return json.dumps(state_forcaste,ensure_ascii=False)
-        state_forcaste_str = "经过综合考虑当前推演场景、我方已决策的子任务序列、敌方的既往可能活动，方案智能生成分系统对后续局势做出如下推测：\n"
+        state_forcaste_str = "  经过综合考虑当前推演场景、我方已决策的子任务序列、敌方的既往可能活动，方案智能生成分系统对后续局势做出如下推测：\n"
         for key_str in list(state_forcaste.keys()):
             state_forcaste_str += key_str
             state_forcaste_str += "："

@@ -19,7 +19,7 @@ class DeLLMa():
         self.text_transfer= text_transfer()
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
-        self.model_communication = ModelCommLangchain(model_name="deepseek",Comm_type="DeLLMa",role="none") # "qianfan" 
+        self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none") # "qianfan" 
 
         self.unit_type = unit_type 
         
@@ -213,12 +213,21 @@ class DeLLMa():
         # print(state_enumeration_prompt)
         # response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
         # response_str = text_DeLLMa_state
+        flag_comm = True
         if self.config_assist["num_round"]>=self.config_assist["num_saved"]:
             # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
             # response_str = text_DeLLMa_state2
-            response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
+            flag_comm = True
         else:
-            response_str = self.config_assist["jieguo"]["state_str_list"][self.config_assist["num_round"]]
+            try:
+                response_str = self.config_assist["jieguo"]["state_str_list"][self.config_assist["num_round"]]
+                flag_comm = False
+            except:
+                flag_comm = True
+
+        if flag_comm:
+            response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
+
 
         # print(response_str)
         self.restore_jieguo(response_str,model="state")
@@ -227,7 +236,7 @@ class DeLLMa():
         state_forecasting_json = self.text_transfer.get_json_from_str(response_str)
 
         # 然后往输出的那里面存一下
-        state_forecasting_str = self.text_transfer.get_str_from_json(state_forecasting_json)
+        state_forecasting_str = self.text_transfer.state_forcaste_to_str(state_forecasting_json)
         self.add_jieguo(state_forecasting_str,model="state")
         
         return state_forecasting_json
@@ -240,11 +249,20 @@ class DeLLMa():
         # 好，弄好之后和大模型互动一波，看看出来的东西是什么样。
         # response_str = self.model_communication.communicate_with_model(dellma_prompt)
         # response_str = text_DeLLMa_utility
+        flag_comm = True
         if self.config_assist["num_round"]>=self.config_assist["num_saved"]:
             # 那说明是第二次跑到这里，最开始是用于测试“下一个任务行不行”的
-            response_str = self.model_communication.communicate_with_model(dellma_prompt)
+            flag_comm = True
         else:
-            response_str = self.config_assist["jieguo"]["utility_str_list"][self.config_assist["num_round"]]
+            try:
+                response_str = self.config_assist["jieguo"]["utility_str_list"][self.config_assist["num_round"]]
+                flag_comm = False
+            except:
+                flag_comm = True
+
+        if flag_comm:
+            response_str = self.model_communication.communicate_with_model(dellma_prompt)
+
         print(response_str)
         self.restore_jieguo(response_str,model="utility")
 

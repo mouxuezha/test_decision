@@ -36,7 +36,7 @@ MODEL_KWARGS = {
         'temperature': 0.1
     },
     'qianfan': {
-        'model': 'ERNIE-3.5-8K', # 'ERNIE-Bot-turbo', # Qianfan-Chinese-Llama-2-7B
+        'model': 'ERNIE-3.5-128K', # 'ERNIE-Bot-turbo', # Qianfan-Chinese-Llama-2-7B，'ERNIE-3.5-8K'
         'temperature': 0.1
     },
     'moon': {
@@ -121,7 +121,10 @@ class ModelCommLangchain():
         try:   
             resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
         except:
-            resp = {'response':"the API seems G. "}
+            # resp = {'response':"the API seems G. "}
+            # resp = {'response':"  网络通信超时，当前网络状况不佳，被迫跳过该步骤。"}
+            print("网络通信超时，当前网络状况不佳，被迫跳过该步骤。")
+            resp = {'response':" "}
         # resp = self.chain.invoke([HumanMessage(content=message)], config={"callbacks": self.cb})
         resp_str = resp['response']
         self.save_txt(resp_str)
@@ -156,14 +159,14 @@ if __name__ == '__main__':
     flag = 0
     if flag == 0 :
         # communication = ModelCommLangchain(model_name='ollama')
-        communication = ModelCommLangchain(model_name='deepseek')
-        # communication = ModelCommLangchain(model_name='moon')
+        # communication = ModelCommLangchain(model_name='deepseek')
+        communication = ModelCommLangchain(model_name='zhipu')
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
         #                 我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
         #                 敌方obj_id为MainBattleTank_ZTZ200_1的坦克位置在(100.13174,13.6571)处 \n
         #                 敌方obj_id为WheeledCmobatTruck_ZB200_3的步战车位置在(100.12582,13.65363)处"""
-        test_str = "你好，测试deepseek API调用是否成功，我们成功了吗？"
+        test_str = "你好，测试大模型 API调用是否成功，我们成功了吗？"
         ret = communication.communicate_with_model(test_str)
         print(ret)
         print(communication.history_output_tokens)

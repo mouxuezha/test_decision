@@ -56,6 +56,18 @@ class mission_plan():
 
         return next_submission
     
+    def describe_last_submission(self):
+        # 返回一段描述下一个子任务的话，用于发过去显示在前端。
+        
+        # 先取出一个子任务出来看看成色
+        submission_single = self.submission_list[-1]
+
+        # 然后生成一段对话。
+        str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，辅助决策系统为" + submission_single.force_arrange + "分配了一个任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
+
+        return str_single
+
+    
     def get_planned_prompt(self):
         # 如果是之前已经决策决策到一半的，那就是需要把已有的submission_list转化成一些Prompt，用于输入进去
         geshu = len(self.submission_list)

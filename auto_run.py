@@ -186,9 +186,9 @@ class auto_run_comunicator():
                 # 那就是当前这条命令是方案生成的。
                 # 原则上这里应该来线程池了，大点儿的指令就专门给它开个线程，小的就不开了。
                 print("handle_command_expedient： 方案生成")
-                mission_arrange_single = mission_arrange() 
-                # plan_list = mission_arrange_single.main_loop(plan_num = 3)
-                plan_list = mission_arrange_single.main_loop_debug(plan_num = 3)
+                mission_arrange_single = mission_arrange(communicator=self) 
+                plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                # plan_list = mission_arrange_single.main_loop_debug(plan_num = 3)
                 self.send_plan(plan_list)
                 self.running_result["Planning"] = plan_list
             elif command_type == "方案评估":
