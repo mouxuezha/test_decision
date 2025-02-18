@@ -26,7 +26,8 @@ CHAT_MODELS = {
     'moon': MoonshotChat,  # 20241010这个的参数好像改了，导致用不了了
     'qwen': ChatTongyi,
     'baichuan': ChatBaichuan,
-    'ollama': ChatOpenAI
+    'ollama': ChatOpenAI,
+    'deepseek': ChatOpenAI
 }
 
 MODEL_KWARGS = {
@@ -56,7 +57,12 @@ MODEL_KWARGS = {
         'model': 'qwen72b',
         'base_url': 'http://192.168.1.213:11434/v1/',
         'api_key': 'ollama'
-    }    
+    },    
+    "deepseek": {
+        'model': 'deepseek-chat',
+        'base_url': 'https://api.deepseek.com',
+        'api_key': os.getenv('DEEPSEEK_API_KEY')      
+    }
 }
 
 class TokenHandler(BaseCallbackHandler):
@@ -94,7 +100,6 @@ class ModelCommLangchain():
             system_template = PROMPT_TEMPLATES['llm_chat']['embrace_none']
         else:
             raise Exception("Comm_type error")
-        
         prompt_template = ChatPromptTemplate.from_messages(
                 [("system", system_template), ("user", "{input}")]
             )
@@ -105,14 +110,14 @@ class ModelCommLangchain():
         self.chain = ConversationChain(
             prompt = prompt_template,
             llm = chat_model,
-            memory = ConversationBufferWindowMemory(k=1),
+            memory = ConversationBufferWindowMemory(k=3),
             output_parser = StrOutputParser()
         )
         self.msgs = self.chain.memory.buffer
         self.cb = [TokenHandler(self.model_name, self.history_output_tokens)]
     
     def communicate_with_model(self, message):
-        self.save_txt(message)        
+        self.save_txt(message)           
         try:   
             resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
         except:
@@ -148,14 +153,33 @@ class ModelCommLangchain():
         print(str_buffer)
         
 if __name__ == '__main__':
-    # communication = ModelCommLangchain(model_name='ollama')
-    communication = ModelCommLangchain(model_name='qianfan')
-    # communication = ModelCommLangchain(model_name='moon')
-    # communication.communicate_with_model('你好')
-    test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
-                    我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
-                    敌方obj_id为MainBattleTank_ZTZ200_1的坦克位置在(100.13174,13.6571)处 \n
-                    敌方obj_id为WheeledCmobatTruck_ZB200_3的步战车位置在(100.12582,13.65363)处"""
-    ret = communication.communicate_with_model(test_str)
-    # print(ret)
-    print(communication.history_output_tokens)
+    flag = 0
+    if flag == 0 :
+        # communication = ModelCommLangchain(model_name='ollama')
+        communication = ModelCommLangchain(model_name='deepseek')
+        # communication = ModelCommLangchain(model_name='moon')
+        # communication.communicate_with_model('你好')
+        # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
+        #                 我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
+        #                 敌方obj_id为MainBattleTank_ZTZ200_1的坦克位置在(100.13174,13.6571)处 \n
+        #                 敌方obj_id为WheeledCmobatTruck_ZB200_3的步战车位置在(100.12582,13.65363)处"""
+        test_str = "你好，测试deepseek API调用是否成功，我们成功了吗？"
+        ret = communication.communicate_with_model(test_str)
+        print(ret)
+        print(communication.history_output_tokens)
+    elif flag == 1:
+        # Please install OpenAI SDK first: `pip3 install openai`
+
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com")
+
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": "测试API调用，你好！"},
+                {"role": "user", "content": "当朝大学士，统共有五位，朕不得不罢免几位？"},
+            ],
+            stream=False
+        )
+
+        print(response.choices[0].message.content)

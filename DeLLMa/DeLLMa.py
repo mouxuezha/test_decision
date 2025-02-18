@@ -19,14 +19,14 @@ class DeLLMa():
         self.text_transfer= text_transfer()
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
-        self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none")
+        self.model_communication = ModelCommLangchain(model_name="deepseek",Comm_type="DeLLMa",role="none") # "qianfan" 
 
         self.unit_type = unit_type 
         
         self.set_config_assist()
         
         self.output_docx = output_docx()
-        self.output_docx.set_heading("劳动竞赛场景下任务分配尝试")
+        self.output_docx.set_heading("多军兵种联合陆地攻防作战场景下任务分配案例")
         
     
     def set_config_assist(self,**kargs):
@@ -75,6 +75,22 @@ class DeLLMa():
             self.config_assist["jieguo"][key_str_list].append(jieguo_str)
         
         self.output_docx.set_jieguo(self.config_assist["jieguo"])
+    
+    def add_jieguo(self,jieguo_str,model="state"):
+        # 这个是在之前的基础上加一些东西。
+        if model == "state":
+            key_str_list = "state_str_list"
+        elif model == "utility":
+            key_str_list = "utility_str_list"
+
+        try:
+            index = self.config_assist["num_round"]
+            self.config_assist["jieguo"][key_str_list][index] = jieguo_str + self.config_assist["jieguo"][key_str_list][index]
+            self.output_docx.set_jieguo(self.config_assist["jieguo"])
+        except:
+            pass
+
+        pass
 
 
     def set_utility_prompt(self, utility_prompt: str):
@@ -209,6 +225,10 @@ class DeLLMa():
 
         # 然后处理成JSON再返回吧
         state_forecasting_json = self.text_transfer.get_json_from_str(response_str)
+
+        # 然后往输出的那里面存一下
+        state_forecasting_str = self.text_transfer.get_str_from_json(state_forecasting_json)
+        self.add_jieguo(state_forecasting_str,model="state")
         
         return state_forecasting_json
     

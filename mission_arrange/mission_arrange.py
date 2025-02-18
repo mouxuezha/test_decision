@@ -79,11 +79,16 @@ class mission_arrange:
     
     def main_loop_debug(self, plan_num = 3):
         # 这个是用来调试的.
-        name0 = "jieguo0"
-        plan0 = self.load_one_plan(name0)
-        for index in range(plan_num):
-            # 直接重复几次，复制几个就好了嘛
-            self.plan_list.append(plan0)
+        # name0 = "jieguo0"
+        # plan0 = self.load_one_plan(name0)
+        # for index in range(plan_num):
+        #     # 直接重复几次，复制几个就好了嘛
+        #     self.plan_list.append(plan0)
+        
+        for i in range(plan_num):
+            name_i = "jieguo" + str(i)
+            plan_i = self.load_one_plan(name_i)
+            self.plan_list.append(plan_i)
 
         return self.plan_list
 
@@ -121,11 +126,20 @@ class mission_arrange:
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
-    shishi = mission_arrange()
-    # input_prompt = StagePrompt()
-    # index = 1
-    # jieguo1 = shishi.get_one_plan(input_prompt.get_stage_prompt_plan(index))
-    # shishi.save_one_plan(jieguo1,"jieguo1")
-    # jieguo2 = shishi.load_one_plan("jieguo1")
-    shishi.main_loop(plan_num = 2)
-    print("完事儿了一(?)次，看看成色。")
+    flag = 0
+    if flag == 0:
+        shishi = mission_arrange()
+        shishi.main_loop(plan_num = 3)
+        print("完事儿了一(?)次，看看成色。")
+    elif flag == 1:
+        shishi = mission_arrange()
+        # 加载进来看看成色。
+        shishi.main_loop_debug(plan_num=3)
+    # shishi = mission_arrange()
+    # # input_prompt = StagePrompt()
+    # # index = 1
+    # # jieguo1 = shishi.get_one_plan(input_prompt.get_stage_prompt_plan(index))
+    # # shishi.save_one_plan(jieguo1,"jieguo1")
+    # # jieguo2 = shishi.load_one_plan("jieguo1")
+    # shishi.main_loop(plan_num = 3)
+    # print("完事儿了一(?)次，看看成色。")

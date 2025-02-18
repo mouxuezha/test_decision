@@ -83,7 +83,7 @@ class submission():
             if submission.force_arrange == self.force_arrange:
                 if self.time_arrange[0]< submission.time_arrange[1]:
                     self.time_arrange[0] = submission.time_arrange[1]
-        self.time_arrange[1] = self.time_arrange[0] + 2000 
+        self.time_arrange[1] = self.time_arrange[0] + 3000 
         # 这里加多少就是一个任务分配多长的帧数。
         # print("unfinished yet, submission.arrange_time")
     
@@ -103,7 +103,8 @@ class submission():
 
 # 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
 # submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]
-submission_type_list = ["none", "陆地进攻", "空中侦察"] # 来个简化版的不然太多了    
+submission_type_list = ["none", "陆地进攻", "空中侦察"] # 来个简化版的不然太多了
+
 # unit_type = ["坦克和自行迫榴炮", "无人机和巡飞弹", "所有地面装备"]
 unit_type = ["坦克和自行迫榴炮", "装甲车等其他地面力量", "无人机和巡飞弹"]
 
