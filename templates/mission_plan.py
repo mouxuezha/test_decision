@@ -45,8 +45,10 @@ class mission_plan():
         if len(self.submission_list)>0:
             if next_submission.check_equal(self.submission_list[-1]):
                 # 估计得重新写一个判断等于函数
-                raise Exception("任务生成的有问题，这个就不应该放进去。")
-            self.submission_list.append(next_submission)
+                print("mission_plan: 发现下一个决策和上一个决策完全一样，不进行append操作。")
+                # raise Exception("任务生成的有问题，这个就不应该放进去。")
+            else:
+                self.submission_list.append(next_submission)
         else:
             self.submission_list.append(next_submission)
         self.DeLLMa.output_docx.set_submission(self.submission_list)
@@ -56,11 +58,11 @@ class mission_plan():
 
         return next_submission
     
-    def describe_last_submission(self):
+    def describe_last_submission(self,index = -1 ):
         # 返回一段描述下一个子任务的话，用于发过去显示在前端。
         
         # 先取出一个子任务出来看看成色
-        submission_single = self.submission_list[-1]
+        submission_single = self.submission_list[index]
 
         # 然后生成一段对话。
         str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，辅助决策系统为" + submission_single.force_arrange + "分配了一个任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
@@ -98,7 +100,7 @@ class mission_plan():
 
     def get_waiting_prompt(self):
         # 查出还需要决策的单位和时间。确切地说应该是所有所有单位，在多少帧之前进行了决策。
-        print("unfinishd yet, get_waiting_prompt")
+        # print("unfinishd yet, get_waiting_prompt")
         time_arranged = self.submission_list[-1].time_arrange[1]
         force_arranged = self.submission_list[-1].force_arrange
         

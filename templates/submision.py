@@ -42,19 +42,19 @@ class submission():
         #     self.id_str = next_mission_json["id"]
         index = len(submission_list)
         self.id_str = self.type_str + str(index)
-        
+
+        if "参加单位" in next_mission_json:
+            force_arrange_str = next_mission_json["参加单位"]
+            # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
+            self.force_arrange = self.arrange_force(force_arrange_str)      
+
+        # 先分配单位再来算时间，因为算时间是看着单位算。  
         self.arrange_time(submission_list)
 
         if "出击方向" in next_mission_json:
             direction = next_mission_json["出击方向"]
+            # 算方向得根据时间来算，所以要先分配了时间再来
             self.set_direction(direction,self.type_str)
-        
-        if "参加单位" in next_mission_json:
-            force_arrange_str = next_mission_json["参加单位"]
-            # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
-            self.force_arrange = self.arrange_force(force_arrange_str)
-        
-        
         
         self.flag_well_defined = self.check_well_define()
     

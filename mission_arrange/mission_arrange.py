@@ -7,6 +7,7 @@ from templates.mission_plan import mission_plan
 from text_transfer.stage_prompt import StagePrompt
 import pickle 
 import dill 
+import time
 
 class mission_arrange:
     def __init__(self, status="none", intent="none", prior_knowledge="none",communicator="none"):
@@ -74,12 +75,15 @@ class mission_arrange:
     def main_loop(self, plan_num = 3):
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
+        start_time = time.time()
         for index in range(plan_num):
             # index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
             users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
             self.plan_list.append(jieguo)
         pass
+        end_time = time.time()
+        print("mission_arrange.main_loop,本轮"+str(plan_num)+"个方案，生成方案耗时：", end_time - start_time, "秒")
         return self.plan_list
     
     def main_loop_debug(self, plan_num = 3):
@@ -91,12 +95,24 @@ class mission_arrange:
         #     self.plan_list.append(plan0)
         
         for i in range(plan_num):
+            time.sleep(11.4514)
             name_i = "jieguo" + str(i)
             plan_i = self.load_one_plan(name_i)
+            # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
+            self.report_one_plan(plan_i)
             self.plan_list.append(plan_i)
 
         return self.plan_list
-
+    
+    def report_one_plan(self,plan_input:mission_plan):
+        # 这个就是发送方案生成过程到前端的东西。
+        geshu = len(plan_input.submission_list)
+        for i in range(geshu):
+            index = i 
+            next_report_str = plan_input.describe_last_submission(index)
+            if not(self.communicator == "none"):
+                self.communicator.send_response(next_report_str) # 这个直接传到前端去，并且保持兼容性。
+            # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):
         # 这个就是跑完一次存一下看看成色。
