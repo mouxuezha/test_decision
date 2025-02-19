@@ -555,8 +555,19 @@ class text_transfer(object):
         # 最后转成字符串拿出去，岂不美哉。
         plan_list_str = json.dumps(plan_list_dict,ensure_ascii=False)
         return plan_list_str
-        print("plan_list_to_str: unfinished yet")
-        return "plan_list_to_str debug str here"
+    
+    def plan_list_to_str2(self,plan_list:list):
+        # 行吧，这个是按照雪楠哥他们的格式重新弄的。
+        plan_list_str = "{\"SchemesDataList\":["
+        geshu = len(plan_list)
+        for i in range(geshu):
+            plan_single = plan_list[i]
+            plan_single_str = self.plan_single_to_str2(plan_single)
+            plan_list_str += plan_single_str + ","
+
+        plan_list_str = plan_list_str[0:-1] # 删除一个多余的逗号
+        plan_list_str += "],\"msgCommid\":\"\"}" 
+        return plan_list_str
     
     def plan_single_to_str(self,plan_single):
         # 这个是想一个转换的方式把方案给过去。
@@ -570,6 +581,28 @@ class text_transfer(object):
             plan_single_dict[submission_id] = submission_single_dict
 
         return plan_single_dict
+    
+    def plan_single_to_str2(self, plan_single):
+        # 行吧，这个是按照雪楠哥他们的格式重新弄的。
+        plan_singe_str = "{\"SchemesName\":\""+ plan_single.id_str +"\",\"SchemesNameText\":\""+plan_single.target_str+"\",\"schemesItems\":["
+        
+        for submission_single in plan_single.submission_list:
+            submission_single_str = self.submission_single_to_str2(submission_single)
+            plan_singe_str += submission_single_str + ","
+        
+        plan_singe_str = plan_singe_str[0:-1] # 删除一个多余的逗号
+        plan_singe_str +="]}"
+        
+        return plan_singe_str
+    
+    def submission_single_to_str2(self,submission_single):
+        
+        # 行吧，这个是按照雪楠哥他们的格式重新弄的。每个子任务分别处理
+
+        submission_str = "{\"alt\":0.0,\"force_arrange\":\""+submission_single.force_arrange+"\",\"id\":\""+submission_single.id_str+"\",\"lat\":"+str(submission_single.space_arrange[0])+",\"lon\":" + str(submission_single.space_arrange[1]) + ",\"type\":\"" + submission_single.type_str+"\"}"
+        
+        return submission_str
+        # pass
     
     def submission_single_to_str(self,submission_single):
         # 这个是想一个转换的方式把方案给过去。每个子任务分别处理。
@@ -586,6 +619,11 @@ class text_transfer(object):
         # submission_single_dict["space_arrange"] = submission_single.space_arrange
 
         return submission_single_dict
+    
+    def response_wrap(self, response_str:str):
+        # 这个是包装一下
+        wrapped_str = "{\"SchemesDataList\":[],\"msgCommid\":\""+response_str+"\"}"        
+        return wrapped_str
 
     def generate_ECM_model(self):
         # 生成电子干扰的说法。

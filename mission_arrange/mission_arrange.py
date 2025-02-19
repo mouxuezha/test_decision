@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from templates.mission_plan import mission_plan
 from text_transfer.stage_prompt import StagePrompt
+from text_transfer.text_transfer import *
 import pickle 
 import dill 
 import time
@@ -18,6 +19,7 @@ class mission_arrange:
         self.index = 1
         self.plan_list = [] # 这个还是得存的嘛。
         self.communicator = communicator # 把交互那个的引用传进来，在适当的时候print一些东西到前端，反正异步的。
+        self.text_transfer = text_transfer()
 
     def get_one_plan(self,**kargs):
         # 引入用于实现多方案的Prompt。
@@ -62,8 +64,8 @@ class mission_arrange:
             next_submission = one_plan.decide_next_submission()
             next_report_str = one_plan.describe_last_submission()
             
-            if not(self.communicator == "none"):
-                self.communicator.send_response(next_report_str) # 这个直接传到前端去，并且保持兼容性。
+            # if not(self.communicator == "none"):
+            #     self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
             # 但是在调试的时候可以开了它，这样就容易给出结果。
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
@@ -95,7 +97,7 @@ class mission_arrange:
         #     self.plan_list.append(plan0)
         
         for i in range(plan_num):
-            time.sleep(11.4514)
+            # time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
             name_i = "jieguo" + str(i)
             plan_i = self.load_one_plan(name_i)
             # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
@@ -108,10 +110,12 @@ class mission_arrange:
         # 这个就是发送方案生成过程到前端的东西。
         geshu = len(plan_input.submission_list)
         for i in range(geshu):
+            # 这里也是需要延迟的，不然方案一下全出来还是有点吓人的
+            # time.sleep(1.14514*2)
             index = i 
             next_report_str = plan_input.describe_last_submission(index)
-            if not(self.communicator == "none"):
-                self.communicator.send_response(next_report_str) # 这个直接传到前端去，并且保持兼容性。
+            # if not(self.communicator == "none"):
+            #     self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
             # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):
@@ -148,9 +152,9 @@ class mission_arrange:
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
-    flag = 0
+    flag = 1
     if flag == 0:
-        plan_num = 1
+        plan_num = 3
         shishi = mission_arrange()
         shishi.main_loop(plan_num = plan_num)
         print("方案智能生成分系统，已完成一轮方案生成，本轮包含"+str(plan_num)+"个方案。")

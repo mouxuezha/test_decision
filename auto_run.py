@@ -94,8 +94,9 @@ class auto_run_comunicator():
             time.sleep(1.14514)
             print("auto_run_communicator:running...")
 
-            self.send_response("text str from auto_run_communicator")
-            
+            # self.send_response("{\"SchemesDataList\":[],\"msgCommid\":\"测试接受数据Ai指令\"}" +"text str from auto_run_communicator")
+            # self.send_response("{\"SchemesDataList\":[],\"msgCommid\":\"text str from auto_run_communicator\"}")
+            # self.send_response(self.text_transfer.response_wrap("text str from auto_run_communicator")) # 鉴定为好使。
             if self.config_dict["flag_exit"] == False:
                 # 那就是无事发生。
                 pass
@@ -135,10 +136,14 @@ class auto_run_comunicator():
         # 这个是单线程的，无限循环写在这里面。
         # 这个是处理指令的
         while(True):
-            if not self.receive_queue.empty():
-                receive_dict_single = self.receive_queue.get()
-                receive_str = list(receive_dict_single.values())[0]
-                receive_seat = list(receive_dict_single.keys())[0]
+            if (not self.receive_queue.empty()) or True : # 后面这半句and True是调试的时候用的。
+                
+                # receive_dict_single = self.receive_queue.get() # 好家伙，这个会阻塞
+                # receive_str = list(receive_dict_single.values())[0]
+                # receive_seat = list(receive_dict_single.keys())[0]
+
+                receive_str = "114514"
+                receive_seat = "commandor"
                 
                 # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
                 # future = self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
@@ -167,11 +172,15 @@ class auto_run_comunicator():
         # 把多方案解析解析，给GUI发过去。
         
         # 然后把方案弄出来,然后准备发过去。
-        plans_str = self.text_transfer.plan_list_to_str(new_plans)
-        self.running_result["Planning_str"] = plans_str
-        # 组合一下报文
-        plans_str = self.command_transfer.arrange_communication(Action=plans_str,communication_type="Plans",)
+        # plans_str = self.text_transfer.plan_list_to_str(new_plans)
 
+        # self.running_result["Planning_str"] = plans_str
+        # # 组合一下报文
+        # plans_str = self.command_transfer.arrange_communication(Action=plans_str,communication_type="Plans",)
+
+        plans_str = self.text_transfer.plan_list_to_str2(new_plans)
+        
+        # 行吧，果然没有那么好的事情让别人照着我的数据结构来，那就怎么方便怎么来呗。
         self.send_response(plans_str)
 
         # 后面如果要有别的办法来传结构化数据，那就都是在这个函数里面拓展。
@@ -193,8 +202,8 @@ class auto_run_comunicator():
                 # 原则上这里应该来线程池了，大点儿的指令就专门给它开个线程，小的就不开了。
                 print("handle_command_expedient： 方案生成")
                 mission_arrange_single = mission_arrange(communicator=self) 
-                plan_list = mission_arrange_single.main_loop(plan_num = 3)
-                # plan_list = mission_arrange_single.main_loop_debug(plan_num = 3)
+                # plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                plan_list = mission_arrange_single.main_loop_debug(plan_num = 3)
                 self.send_plan(plan_list)
                 self.running_result["Planning"] = plan_list
             elif command_type == "方案评估":
