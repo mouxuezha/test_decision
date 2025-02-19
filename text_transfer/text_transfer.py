@@ -3,6 +3,7 @@
 import math
 import json
 from typing import Optional, Dict, List, Tuple, Callable
+import random
 
 class text_transfer(object):
     def __init__(self) -> None:
@@ -382,6 +383,18 @@ class text_transfer(object):
         while "\n\n" in input_str:  
             input_str = input_str.replace("\n\n","\n")
 
+        # 然后继续特殊处理，把json切走。
+        if "json" in input_str:
+            # 那就是说里面有怪东西
+            index_qian = input_str.find("json")
+            sub_str = input_str[index_qian:]
+            if "```" in sub_str:
+                index_hou = sub_str.rfind("```")
+            else:
+                index_hou = sub_str.find("}")
+            
+            input_str = input_str.replace(sub_str[0:index_hou+1],"")
+
         return input_str
 
     def get_str_from_json(self, json_jieguo:dict):
@@ -573,6 +586,45 @@ class text_transfer(object):
         # submission_single_dict["space_arrange"] = submission_single.space_arrange
 
         return submission_single_dict
+
+    def generate_ECM_model(self):
+        # 生成电子干扰的说法。
+        model_dict ={}
+        model_dict["电子攻击"] = ["噪声干扰，通过发射高功率噪声信号，阻塞敌方通信频段，使其无法有效通联。在发现敌巡飞弹后将波束集中于其上，全力确保我地面单位不受其影响","欺骗干扰，通过发射虚假信号，误导敌方探测，使其产生错误的目标信息。", "反辐射攻击，确定敌方主要辐射源位置后同步至我方自行迫榴炮和远程火力，选配相应弹种对其进行反辐射打击。"]
+        model_dict["电子防护"] = ["频率捷变，快速改变通信工作频率，避开敌方干扰，优先保障我方各个作战单元之间的态势及时共享和命令及时传达。","功率管理，动态调整发射功率，降低我方电子干扰车被侦测和干扰的概率。","多路径传输，通过多条路径传输信号，提高抗干扰和抗截获能力，保障在受扰条件下我前线各地面作战单元之间仍能及时共享态势"] 
+        model_dict["电子侦察"] = ["信号情报，通过侦测、截获和分析敌方电磁信号，获取战术情报，主要关注敌电子干扰车位置、模式和巡飞弹动向","测向与定位，确定敌方电子信号源的方向和精确位置，引导我远程火力打击敌电子干扰车和地面防空力量，并引导我地面作战力量规避敌方无人机和巡飞弹的打击与侦察。","被动侦察，仅接收敌方电磁信号，不主动发射信号，避免暴露我方电子干扰车位置。"]
+        model_dict["电子静默"] = ["暂时关机，以防敌方进行针对性反辐射打击。","撤收转移，主动撤收并转移阵地，以规避敌方地面作战单元和远程反辐射火力，保全自身力量。"]
+
+        model_list = list(model_dict.keys())
+        index1 = random.randint(0,len(model_list)-1)
+        model_selected = model_list[index1]
+        submodel_list = model_dict[model_selected]
+        index2 = random.randint(0,len(submodel_list)-1)
+        submodel_selected = submodel_list[index2]
+
+        return model_selected,submodel_selected
+
+
+    def state_forcaste_to_str(self, state_forcaste:dict):
+        # 这个是把state_forcaste转成字符串，面向输出，所以需要搞一些
+        # return json.dumps(state_forcaste,ensure_ascii=False)
+        state_forcaste_str = "  经过综合考虑当前推演场景、我方已决策的子任务序列、敌方的既往可能活动，方案智能生成分系统对后续局势做出如下推测：\n"
+        for key_str in list(state_forcaste.keys()):
+            state_forcaste_str += key_str
+            state_forcaste_str += "："
+
+            kenengxing_list = list(state_forcaste[key_str].keys())
+            for i in range(len(kenengxing_list)):
+                kenengxing_key = kenengxing_list[i]
+                kenengxing_value = state_forcaste[key_str][kenengxing_key]
+                state_forcaste_str += str(kenengxing_value)
+                state_forcaste_str += kenengxing_key
+                state_forcaste_str += "，"
+            state_forcaste_str += "\n"
+
+        return state_forcaste_str
+
+
 class type_transfer(object):
     # 这个是用来把抽象的装备类型化简一下的，搞成中文的。
     def __init__(self):

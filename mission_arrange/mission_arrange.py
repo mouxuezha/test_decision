@@ -7,15 +7,17 @@ from templates.mission_plan import mission_plan
 from text_transfer.stage_prompt import StagePrompt
 import pickle 
 import dill 
+import time
 
 class mission_arrange:
-    def __init__(self, status="none", intent="none", prior_knowledge="none"):
+    def __init__(self, status="none", intent="none", prior_knowledge="none",communicator="none"):
         self.status = status
         self.intent = intent
         self.prior_knowledge = prior_knowledge
         self.input_prompt = StagePrompt()
         self.index = 1
         self.plan_list = [] # 这个还是得存的嘛。
+        self.communicator = communicator # 把交互那个的引用传进来，在适当的时候print一些东西到前端，反正异步的。
 
     def get_one_plan(self,**kargs):
         # 引入用于实现多方案的Prompt。
@@ -39,7 +41,7 @@ class mission_arrange:
             # 那就是里面有东西。
             one_plan.set_users_goal(users_goal)
         if self.index == 0:
-            num_saved = 6 
+            num_saved = 1
         else:
             num_saved = 0
         
@@ -49,7 +51,7 @@ class mission_arrange:
 
         # 好，先把DeLLMa润起来看Prompt好了，冲就完事儿了。
         # 要是后面要搞人机交互的话，就是在每一次decide前加一些读取命令、操作submissionlist的东西。
-        next_submission = one_plan.decide_next_submission()
+        # next_submission = one_plan.decide_next_submission()
       
         time_now = 0 
         while(time_now<5000):
@@ -58,6 +60,10 @@ class mission_arrange:
         # for i in range(3):
             # 最理想的其实应该是检测submission的时间来决定是不是结束，以及更新那些东西。
             next_submission = one_plan.decide_next_submission()
+            next_report_str = one_plan.describe_last_submission()
+            
+            if not(self.communicator == "none"):
+                self.communicator.send_response(next_report_str) # 这个直接传到前端去，并且保持兼容性。
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
             # 但是在调试的时候可以开了它，这样就容易给出结果。
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
@@ -69,24 +75,44 @@ class mission_arrange:
     def main_loop(self, plan_num = 3):
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
+        start_time = time.time()
         for index in range(plan_num):
-            index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
+            # index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
             users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
             self.plan_list.append(jieguo)
         pass
+        end_time = time.time()
+        print("mission_arrange.main_loop,本轮"+str(plan_num)+"个方案，生成方案耗时：", end_time - start_time, "秒")
         return self.plan_list
     
     def main_loop_debug(self, plan_num = 3):
         # 这个是用来调试的.
-        name0 = "jieguo0"
-        plan0 = self.load_one_plan(name0)
-        for index in range(plan_num):
-            # 直接重复几次，复制几个就好了嘛
-            self.plan_list.append(plan0)
+        # name0 = "jieguo0"
+        # plan0 = self.load_one_plan(name0)
+        # for index in range(plan_num):
+        #     # 直接重复几次，复制几个就好了嘛
+        #     self.plan_list.append(plan0)
+        
+        for i in range(plan_num):
+            time.sleep(11.4514)
+            name_i = "jieguo" + str(i)
+            plan_i = self.load_one_plan(name_i)
+            # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
+            self.report_one_plan(plan_i)
+            self.plan_list.append(plan_i)
 
         return self.plan_list
-
+    
+    def report_one_plan(self,plan_input:mission_plan):
+        # 这个就是发送方案生成过程到前端的东西。
+        geshu = len(plan_input.submission_list)
+        for i in range(geshu):
+            index = i 
+            next_report_str = plan_input.describe_last_submission(index)
+            if not(self.communicator == "none"):
+                self.communicator.send_response(next_report_str) # 这个直接传到前端去，并且保持兼容性。
+            # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):
         # 这个就是跑完一次存一下看看成色。
@@ -98,6 +124,7 @@ class mission_arrange:
         # docx那个不能序列化，所以还得想办法改改。
         try:
             plan.DeLLMa.output_docx = "为了保存整个对象，docx功能先关了。"
+            plan.DeLLMa.model_communication = "为了保存整个对象，model_communication功能先关了。"
         except:
             pass
 
@@ -121,11 +148,21 @@ class mission_arrange:
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
-    shishi = mission_arrange()
-    # input_prompt = StagePrompt()
-    # index = 1
-    # jieguo1 = shishi.get_one_plan(input_prompt.get_stage_prompt_plan(index))
-    # shishi.save_one_plan(jieguo1,"jieguo1")
-    # jieguo2 = shishi.load_one_plan("jieguo1")
-    shishi.main_loop(plan_num = 2)
-    print("完事儿了一(?)次，看看成色。")
+    flag = 0
+    if flag == 0:
+        plan_num = 1
+        shishi = mission_arrange()
+        shishi.main_loop(plan_num = plan_num)
+        print("方案智能生成分系统，已完成一轮方案生成，本轮包含"+str(plan_num)+"个方案。")
+    elif flag == 1:
+        shishi = mission_arrange()
+        # 加载进来看看成色。
+        shishi.main_loop_debug(plan_num=3)
+    # shishi = mission_arrange()
+    # # input_prompt = StagePrompt()
+    # # index = 1
+    # # jieguo1 = shishi.get_one_plan(input_prompt.get_stage_prompt_plan(index))
+    # # shishi.save_one_plan(jieguo1,"jieguo1")
+    # # jieguo2 = shishi.load_one_plan("jieguo1")
+    # shishi.main_loop(plan_num = 3)
+    # print("完事儿了一(?)次，看看成色。")
