@@ -42,8 +42,8 @@ class auto_run_comunicator():
         self.max_episode_len = self.net_args.max_episode_len
         # self.env = Env(self.net_args.ip, self.net_args.port)
         print("auto_run_comunicator: 绑定席位和IP地址...")
-        # env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
-        env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor")
+        env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
+        # env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor")
         self.env_dict["commandor"] = env_single
         print("__init_envs: unfinished yet")
 
@@ -93,6 +93,9 @@ class auto_run_comunicator():
         while(flag_temp):
             time.sleep(1.14514)
             print("auto_run_communicator:running...")
+
+            self.send_response("text str from auto_run_communicator")
+            
             if self.config_dict["flag_exit"] == False:
                 # 那就是无事发生。
                 pass
@@ -112,6 +115,9 @@ class auto_run_comunicator():
                 # 从方便调试的角度考虑，接收进来应该先放队列，然后再统一处理
                 gui_order_dict = {seat:gui_order_str}
                 self.receive_queue.put(gui_order_dict)
+
+                # 从方便调试的角度：
+                print("received: " + gui_order_str)
 
         pass
 
