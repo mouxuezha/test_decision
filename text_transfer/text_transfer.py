@@ -3,7 +3,7 @@
 import math
 import json
 from typing import Optional, Dict, List, Tuple, Callable
-import random
+import random,copy 
 
 class text_transfer(object):
     def __init__(self) -> None:
@@ -562,6 +562,9 @@ class text_transfer(object):
         geshu = len(plan_list)
         for i in range(geshu):
             plan_single = plan_list[i]
+            if plan_single.id_str == "none":
+                # 那就改个名字。
+                plan_single.id_str = "方案" + str(i+1)
             plan_single_str = self.plan_single_to_str2(plan_single)
             plan_list_str += plan_single_str + ","
 
@@ -585,16 +588,34 @@ class text_transfer(object):
     def plan_single_to_str2(self, plan_single):
         # 行吧，这个是按照雪楠哥他们的格式重新弄的。
         plan_singe_str = "{\"SchemesName\":\""+ plan_single.id_str +"\",\"SchemesNameText\":\""+plan_single.target_str+"\",\"schemesItems\":["
-        
+        # index = 0 
         for submission_single in plan_single.submission_list:
             submission_single_str = self.submission_single_to_str2(submission_single)
             plan_singe_str += submission_single_str + ","
+            # # 这里加点儿电磁的东西。
+            # if(submission_single.force_arrange == "装甲车等其他地面力量"):
+            #     submission_single_ECM = self.submission_single_to_ECM(submission_single,index=index)
+            #     submission_single_ECM_str = self.submission_single_to_str2(submission_single_ECM)
+            #     plan_singe_str += submission_single_ECM_str + ","            
+            # index=index+1
         
         plan_singe_str = plan_singe_str[0:-1] # 删除一个多余的逗号
         plan_singe_str +="]}"
         
         return plan_singe_str
     
+    def submission_single_to_ECM(self,submission_single,index=0):
+        # 修改生成电子战方案。原则上不应该放这里的，不过不管了下次一定。
+        submission_single_new = copy.deepcopy(submission_single)
+        model_selected, submodel_selected = self.generate_ECM_model()
+
+        submission_single_new.id_str = "电子对抗" + str(index)
+        submission_single_new.type_str = model_selected
+        submission_single_new.force_arrange = "电子干扰车"
+        submission_single_new.target_str = submodel_selected
+        
+        return submission_single_new
+
     def submission_single_to_str2(self,submission_single):
         
         # 行吧，这个是按照雪楠哥他们的格式重新弄的。每个子任务分别处理

@@ -108,7 +108,7 @@ class output_docx():
         self.document.add_paragraph(str_single)
 
         # 然后也是姑且一些说法。
-        str_single = "具体地，结合当前已生成和子任务和推定敌方态势信息，我方电子干扰车需要完成" + model_selected
+        str_single = "具体地，结合当前已生成和子任务和推定敌方态势信息，我方电子干扰车需要完成" + submodel_selected
         state_shuofa_str = self.text_dict["jieguo"]["state_str_list"][i]
         state_shuofa_str = self.text_transfer.cut_from_str(state_shuofa_str,"**","**",model="infinite")
         state_shuofa_str = self.text_transfer.clean_the_str(state_shuofa_str)
