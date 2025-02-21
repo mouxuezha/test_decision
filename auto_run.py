@@ -52,7 +52,7 @@ class auto_run_comunicator():
         parser = argparse.ArgumentParser(description='Provide arguments for agent.')
         parser.add_argument("--ip", type=str, default="127.0.0.1", help="Ip to connect")
         # parser.add_argument("--ip", type=str, default="192.168.43.93", help="Ip to connect")
-        parser.add_argument("--port", type=str, default=30001, help="port to connect")
+        parser.add_argument("--port", type=str, default=port, help="port to connect")
         parser.add_argument("--epochs", type=int, default=200, help="Number of training epochs to run")  # 设置训练轮次数
         parser.add_argument("--max-episode-len", type=int, default=3000, help="maximum episode length")
         net_args = parser.parse_args()

@@ -64,8 +64,8 @@ class mission_arrange:
             next_submission = one_plan.decide_next_submission()
             next_report_str = one_plan.describe_last_submission()
             
-            # if not(self.communicator == "none"):
-            #     self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+            if not(self.communicator == "none"):
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
             # 但是在调试的时候可以开了它，这样就容易给出结果。
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
@@ -97,7 +97,7 @@ class mission_arrange:
         #     self.plan_list.append(plan0)
         
         for i in range(plan_num):
-            # time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
+            time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
             name_i = "jieguo" + str(i)
             plan_i = self.load_one_plan(name_i)
             # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
@@ -114,8 +114,8 @@ class mission_arrange:
             # time.sleep(1.14514*2)
             index = i 
             next_report_str = plan_input.describe_last_submission(index)
-            # if not(self.communicator == "none"):
-            #     self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+            if not(self.communicator == "none"):
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
             # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):
