@@ -74,6 +74,14 @@ class mission_arrange:
         self.plan_list.append(one_plan)
         return one_plan
     
+    def get_void_plan(self):
+        # 这个就是生成一个空的方案，用来占位。
+        one_plan = mission_plan()
+        one_plan.id_str = "未命名方案"
+        one_plan.target_str = "未定义目标"  
+        one_plan.decide_void_submission()
+        return one_plan
+    
     def main_loop(self, plan_num = 3):
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
@@ -99,22 +107,30 @@ class mission_arrange:
         for i in range(plan_num):
             time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
             name_i = "jieguo" + str(i)
+            id_str = "方案" + str(i+1)
+
             plan_i = self.load_one_plan(name_i)
             plan_i = self.add_ECM_submmission(plan_i)
+            plan_i.id_str = id_str
             # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
-            self.report_one_plan(plan_i)
+            # 再在报表里面加一个方案名称。
+            plan_id_str = "正在生成"+plan_i.id_str+","
+            self.report_one_plan(plan_i,more_str=plan_id_str)
             self.plan_list.append(plan_i)
 
         return self.plan_list
     
-    def report_one_plan(self,plan_input:mission_plan):
-        # 这个就是发送方案生成过程到前端的东西。
+    def report_one_plan(self,plan_input:mission_plan,more_str=""):
+        # 这个就是发送方案生成过程到前端的东西。确切地说，是发到前端的对话框里面显示字符串的东西。
         geshu = len(plan_input.submission_list)
         for i in range(geshu):
             # 这里也是需要延迟的，不然方案一下全出来还是有点吓人的
             time.sleep(1.14514*2)
             index = i 
             next_report_str = plan_input.describe_last_submission(index)
+            # 在这里计算一个比例。
+            bili =round((index+1) / geshu,3) 
+            next_report_str = more_str + " 当前进度：" +f"{bili*100}%" + "，生成子任务：" + next_report_str 
             if not(self.communicator == "none"):
                 self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
             # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。

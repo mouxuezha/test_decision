@@ -58,6 +58,17 @@ class mission_plan():
 
         return next_submission
     
+    def decide_void_submission(self):
+        # 搞一个空的子任务用于发回去，用于表示当前是空的
+        next_submission = submission()
+        next_submission.id_str = "未定义子任务"
+        next_submission.target_str = "无"
+        next_submission.type_str = "无"
+        next_submission.force_arrange = "无"
+
+        self.submission_list.append(next_submission)
+        return next_submission
+
     def describe_last_submission(self,index = -1 ):
         # 返回一段描述下一个子任务的话，用于发过去显示在前端。
         
@@ -65,7 +76,7 @@ class mission_plan():
         submission_single = self.submission_list[index]
 
         # 然后生成一段对话。
-        str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，辅助决策系统为" + submission_single.force_arrange + "分配了一个任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
+        str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，方案智能生成分系统为" + submission_single.force_arrange + "分配了任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
 
         return str_single
 

@@ -40,7 +40,6 @@ class auto_run_comunicator():
         self.env_dict = {} 
         self.net_args = self.__init_net(ip = "127.0.0.1", port = 30001)
         self.max_episode_len = self.net_args.max_episode_len
-        # self.env = Env(self.net_args.ip, self.net_args.port)
         print("auto_run_comunicator: 绑定席位和IP地址...")
         env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
         # env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor")
@@ -136,12 +135,15 @@ class auto_run_comunicator():
         # 这个是单线程的，无限循环写在这里面。
         # 这个是处理指令的
         while(True):
-            if (not self.receive_queue.empty()) or True : # 后面这半句and True是调试的时候用的。
+            # if (not self.receive_queue.empty()) or True : # 后面这半句and True是调试的时候用的。
+            if (not self.receive_queue.empty()):
                 
-                # receive_dict_single = self.receive_queue.get() # 好家伙，这个会阻塞
+                # receive_dict_single = self.receive_queue.get() # 好家伙，这个会阻塞。pop不阻塞。
                 # receive_str = list(receive_dict_single.values())[0]
                 # receive_seat = list(receive_dict_single.keys())[0]
-
+                
+                # 这有一个逻辑缺陷，不get了之后它就会一直循环，所以还是得get。
+                receive_dict_single = self.receive_queue.get()
                 receive_str = "114514"
                 receive_seat = "commandor"
                 
@@ -194,6 +196,13 @@ class auto_run_comunicator():
     def handle_command_expedient(self,seat="none",command="none"):
         # 也是权宜之计。这个就是执行一条完整的指令，比如一次方案编辑，之类的。其实是在为后面做准备了有点儿.
         # 这个和收信息那个应该放在不同的线程。
+
+        # 上来先发个默认的方案0过去，然后再说别的。
+        mission_arrange_void = mission_arrange(communicator=self)
+        plan_list_void=[]
+        plan_list_void.append(mission_arrange_void.get_void_plan())
+        self.send_plan(plan_list_void)
+
         flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
         if flag_pass:
             # 那就是鉴权通过了，认为是合法的。
