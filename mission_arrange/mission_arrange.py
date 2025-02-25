@@ -96,7 +96,7 @@ class mission_arrange:
         print("mission_arrange.main_loop,本轮"+str(plan_num)+"个方案，生成方案耗时：", end_time - start_time, "秒")
         return self.plan_list
     
-    def main_loop_debug(self, plan_num = 3):
+    def main_loop_debug(self, plan_num = 3,flag_report = True):
         # 这个是用来调试的.
         # name0 = "jieguo0"
         # plan0 = self.load_one_plan(name0)
@@ -108,14 +108,15 @@ class mission_arrange:
             time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
             name_i = "jieguo" + str(i)
             id_str = "方案" + str(i+1)
-
+            print(name_i)
             plan_i = self.load_one_plan(name_i)
             plan_i = self.add_ECM_submmission(plan_i)
             plan_i.id_str = id_str
             # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
             # 再在报表里面加一个方案名称。
-            plan_id_str = "正在生成"+plan_i.id_str+","
-            self.report_one_plan(plan_i,more_str=plan_id_str)
+            if flag_report:
+                plan_id_str = "正在生成"+plan_i.id_str+","
+                self.report_one_plan(plan_i,more_str=plan_id_str)
             self.plan_list.append(plan_i)
 
         return self.plan_list
@@ -125,7 +126,7 @@ class mission_arrange:
         geshu = len(plan_input.submission_list)
         for i in range(geshu):
             # 这里也是需要延迟的，不然方案一下全出来还是有点吓人的
-            time.sleep(1.14514*2)
+            time.sleep(1.14514/2)
             index = i 
             next_report_str = plan_input.describe_last_submission(index)
             # 在这里计算一个比例。

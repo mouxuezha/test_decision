@@ -62,7 +62,7 @@ class auto_run_comunicator():
         # 分席位的处理也是在这里处理一下算了。原则上只需要跑这一个后端python，是有机会把分席位的事情都干了的。有几分劳动竞赛那个对战的意思了，但是要防止像当时那样来回修改和屎山化。各方比较好接受的是前端大哥们写，然后我能改多少改点儿。
         self.seat_access = {} 
         self.seat_access["status"] = ["态势评估"] # 态势情报席位
-        self.seat_access["support"] = ["装备编辑","子任务编辑","历史方案编辑"] # 信息支援席位
+        self.seat_access["support"] = ["装备编辑","子任务编辑","历史方案"] # 信息支援席位
         self.seat_access["commandor"] = ["root"] # 指挥控制席位，完全权限。
         self.seat_access["evaluator"] = ["方案编辑","方案评估"] # 方案评估席位
         pass
@@ -144,7 +144,7 @@ class auto_run_comunicator():
                 
                 # 这有一个逻辑缺陷，不get了之后它就会一直循环，所以还是得get。
                 receive_dict_single = self.receive_queue.get()
-                receive_str = "114514"
+                receive_str = list(receive_dict_single.values())[0]
                 receive_seat = "commandor"
                 
                 # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
@@ -167,6 +167,9 @@ class auto_run_comunicator():
     def send_response(self,response_str:str):
         # 这次在后端就分开，显示的命令是显示的命令，增加点儿掌控力.这个是通用的入队列的说法。
         # 这里所谓发送，其实就是放进队列里面去的意思嘛。发回去的就不用分什么席位了。
+        if not("SchemesDataList" in response_str):
+            response_str = self.text_transfer.response_wrap(response_str)
+            print("send_response: warning, invalide json, auto-fixed.")
         self.send_queue.put(response_str)
         pass 
 
@@ -197,11 +200,7 @@ class auto_run_comunicator():
         # 也是权宜之计。这个就是执行一条完整的指令，比如一次方案编辑，之类的。其实是在为后面做准备了有点儿.
         # 这个和收信息那个应该放在不同的线程。
 
-        # 上来先发个默认的方案0过去，然后再说别的。
-        mission_arrange_void = mission_arrange(communicator=self)
-        plan_list_void=[]
-        plan_list_void.append(mission_arrange_void.get_void_plan())
-        self.send_plan(plan_list_void)
+        # self.handle_void_plan() # 发空方案的，专门抽出来放一个里面。
 
         flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
         if flag_pass:
@@ -209,19 +208,70 @@ class auto_run_comunicator():
             if (command_type == "方案生成") or (command_type == "root"):
                 # 那就是当前这条命令是方案生成的。
                 # 原则上这里应该来线程池了，大点儿的指令就专门给它开个线程，小的就不开了。
-                print("handle_command_expedient： 方案生成")
-                mission_arrange_single = mission_arrange(communicator=self) 
-                # plan_list = mission_arrange_single.main_loop(plan_num = 3)
-                plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
-                self.send_plan(plan_list)
-                self.running_result["Planning"] = plan_list
-            elif command_type == "方案评估":
+                if "历史方案" in command:
+                    self.handle_load_and_sort(seat=seat,command=command)
+                else:
+                    print("handle_command_expedient： 方案生成")
+                    mission_arrange_single = mission_arrange(communicator=self) 
+                    # plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                    plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
+                    self.send_plan(plan_list)
+                    self.running_result["Planning"] = plan_list
+            elif command_type == "历史方案":
+                self.handle_load_and_sort(seat,command)
                 pass 
             else:
                 print("handle_command_expedient：当前命令类型尚未定义命令处理流程")
 
         pass
+    
+    def handle_load_and_sort(self,seat="none",command="none"):
+        # 这个原则上应该统一从handle_command里面去进入。但是总之先不管了先实现出来再调整从哪里进入。
 
+        # 先发个新的过去，把它盖了
+        self.handle_void_plan()
+        str_waiting = "正在加载历史方案，请稍候。。。"
+        self.send_response(self.text_transfer.response_wrap(str_waiting))
+        time.sleep(1.14514)
+
+        # 然后加载历史方案，发过去。
+        print("handle_load_and_sort，加载历史方案。")
+        mission_arrange_single = mission_arrange(communicator=self) 
+        plan_list = mission_arrange_single.main_loop_debug(plan_num = 3,flag_report=False)
+        self.send_plan(plan_list) # 这里面没有时间延迟，是秒发，所以可以
+        str_waiting = "历史方案已加载，请您审阅。"
+        self.send_response(self.text_transfer.response_wrap(str_waiting))        
+        self.running_result["Planning"] = plan_list
+        time.sleep(1.14514)
+
+        # 然后重新排序，发过去
+        str_waiting = "正在排序，请稍候。。。"
+        self.send_response(self.text_transfer.response_wrap(str_waiting))
+        self.handle_void_plan()
+        time.sleep(1.14514)
+
+
+        plan_list_sorted = self.handle_sort_plan(plan_list)
+        self.send_plan(plan_list_sorted) # 这里面没有时间延迟，是秒发，所以可以
+        str_waiting = "方案排序完成，请您审阅。"
+        self.send_response(str_waiting)
+        
+    def handle_void_plan(self):
+        # 发空方案的，专门抽出来放一个里面。
+
+        # 上来先发个默认的方案0过去，然后再说别的。# 如果不需要发方案0的话就把这段注了
+        mission_arrange_void = mission_arrange(communicator=self)
+        plan_list_void=[]
+        plan_list_void.append(mission_arrange_void.get_void_plan())
+        self.send_plan(plan_list_void)
+        # 上来先发个默认的方案0过去，然后再说别的。# 如果不需要发方案0的话就把这段注了
+    
+    def handle_sort_plan(self,plan_list):
+        plan_list_sorted = [] 
+        for i in range(len(plan_list)):
+            plan_list_sorted.append(plan_list[len(plan_list)-1-i])
+        return plan_list_sorted
+    
     def check_seat_expedient(self, seat, command:str ):
         # 权宜之计。鉴权的说法。
         try:
