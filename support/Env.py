@@ -8,6 +8,7 @@ import numpy as np
 SIZE = 1024 * 1024*2
 import json
 import os
+import time
 
 class Env():
     def __init__(self, IP, port):
@@ -146,6 +147,8 @@ class Env_server_debug():
     # 用于调试的，print到文件里面，就避免网络通信了。
     def __init__(self,IP, port, seat = "commandor") -> None:
         self.text_location = "auto_test/Env_server_debug.txt"
+        self.config_dict = {}
+        self.config_dict["flag_send_start_str"] = False
     
     def init_socket(self):
         pass 
@@ -159,7 +162,14 @@ class Env_server_debug():
         pass 
     def receive_str(self):
         # 返回一点随便什么东西。
-        return_str = "Env_server_debug.receive_str:  调试中，放一系列关键词在这儿方便检索。态势评估，装备编辑，子任务编辑，历史方案编辑，root，方案编辑，方案评估"
+        # return_str = "Env_server_debug.receive_str:  调试中，放一系列关键词在这儿方便检索。态势评估，装备编辑，子任务编辑，历史方案编辑，root，方案编辑，方案评估"
+        # time.sleep(114514)
+        if self.config_dict["flag_send_start_str"]==False:
+            return_str = "root,方案生成" # 只发一次，开起来，就不发了。
+            self.config_dict["flag_send_start_str"] = True
+        else:
+            time.sleep(114514)
+            return_str = "Env_server_debug.receive_str:  调试中,None "
         return return_str
     
     def Step(self, Action=None):

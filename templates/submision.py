@@ -112,7 +112,7 @@ class submission():
             if submission.force_arrange == self.force_arrange:
                 if self.time_arrange[0]< submission.time_arrange[1]:
                     self.time_arrange[0] = submission.time_arrange[1]
-        self.time_arrange[1] = self.time_arrange[0] + 3000 
+        self.time_arrange[1] = self.time_arrange[0] + 1000 
         # 这里加多少就是一个任务分配多长的帧数。
         # print("unfinished yet, submission.arrange_time")
     

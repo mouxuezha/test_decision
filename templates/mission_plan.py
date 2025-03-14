@@ -68,6 +68,10 @@ class mission_plan():
 
         self.submission_list.append(next_submission)
         return next_submission
+    
+    def decide_default_submission(self,force_arrange,num,**kargs):
+        # 这个是为了配合那边接口那里而搞出来的，默认子任务得琢磨一下还。不同的兵种得要不一样的。
+        print("mission_plan: decide_default_submission unfinished yet")
 
     def describe_last_submission(self,index = -1 ):
         # 返回一段描述下一个子任务的话，用于发过去显示在前端。

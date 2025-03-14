@@ -110,7 +110,7 @@ class mission_arrange:
             id_str = "方案" + str(i+1)
             print(name_i)
             plan_i = self.load_one_plan(name_i)
-            plan_i = self.add_ECM_submmission(plan_i)
+            # plan_i = self.add_ECM_submmission(plan_i) # 这个是演示用的，不演示的时候就可以爪巴了。
             plan_i.id_str = id_str
             # 这里得来一个发送方案生成过程到前端的东西，展示就拿这个展示了可能。
             # 再在报表里面加一个方案名称。

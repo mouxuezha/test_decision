@@ -41,8 +41,8 @@ class auto_run_comunicator():
         self.net_args = self.__init_net(ip = "127.0.0.1", port = 30001)
         self.max_episode_len = self.net_args.max_episode_len
         print("auto_run_comunicator: 绑定席位和IP地址...")
-        env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor")
-        # env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor")
+        # env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是和图形用户界面交互
+        env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是本质上不和图形用户界面交互。
         self.env_dict["commandor"] = env_single
         print("__init_envs: unfinished yet")
 
@@ -213,8 +213,8 @@ class auto_run_comunicator():
                 else:
                     print("handle_command_expedient： 方案生成")
                     mission_arrange_single = mission_arrange(communicator=self) 
-                    # plan_list = mission_arrange_single.main_loop(plan_num = 3)
-                    plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
+                    plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                    # plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
                     self.send_plan(plan_list)
                     self.running_result["Planning"] = plan_list
             elif command_type == "历史方案":
