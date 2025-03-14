@@ -105,7 +105,7 @@ class mission_arrange:
         #     self.plan_list.append(plan0)
         
         for i in range(plan_num):
-            time.sleep(1.14514) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
+            time.sleep(1.14514/2) # 这里延时倒是也没问题，但是还不够，里面也还得延时。
             name_i = "jieguo" + str(i)
             id_str = "方案" + str(i+1)
             print(name_i)
@@ -126,7 +126,7 @@ class mission_arrange:
         geshu = len(plan_input.submission_list)
         for i in range(geshu):
             # 这里也是需要延迟的，不然方案一下全出来还是有点吓人的
-            time.sleep(1.14514/2)
+            time.sleep(1.14514/5)
             index = i 
             next_report_str = plan_input.describe_last_submission(index)
             # 在这里计算一个比例。
