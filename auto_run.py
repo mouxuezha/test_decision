@@ -213,7 +213,7 @@ class auto_run_comunicator():
                 else:
                     print("handle_command_expedient： 方案生成")
                     mission_arrange_single = mission_arrange(communicator=self) 
-                    plan_list = mission_arrange_single.main_loop(plan_num = 3)
+                    plan_list = mission_arrange_single.main_loop(plan_num = 1)
                     # plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
                     self.send_plan(plan_list)
                     self.running_result["Planning"] = plan_list

@@ -69,9 +69,32 @@ class mission_plan():
         self.submission_list.append(next_submission)
         return next_submission
     
-    def decide_default_submission(self,force_arrange,num,**kargs):
+    def decide_default_submission(self,force_arrange,num,submission_list,**kargs):
         # 这个是为了配合那边接口那里而搞出来的，默认子任务得琢磨一下还。不同的兵种得要不一样的。
+        # 不要缝合太多的功能，这个就是单纯的生成默认说法。
         print("mission_plan: decide_default_submission unfinished yet")
+        next_mission_json = {}
+        
+
+        if force_arrange == "坦克和自行迫榴炮":
+            # 那默认任务就是向北进攻。
+            next_mission_json["任务类型"] = "陆地进攻"
+            pass
+        elif force_arrange ==  "装甲车等其他地面力量":
+            # 那默认任务本来应该是过去汇合，姑且也先用向北进攻好了。
+            next_mission_json["任务类型"] = "陆地进攻"
+            pass
+        elif force_arrange == "无人机和巡飞弹":
+            # 那默认任务就是去侦查。
+            next_mission_json["任务类型"] = "空中侦察"
+            pass 
+
+        next_mission_json["参加单位"] = force_arrange
+        next_mission_json["出击方向"] = "中间"
+
+        defualt_submission = submission(next_mission_json=next_mission_json,submission_list=submission_list)
+        return defualt_submission
+
 
     def describe_last_submission(self,index = -1 ):
         # 返回一段描述下一个子任务的话，用于发过去显示在前端。
