@@ -27,7 +27,9 @@ CHAT_MODELS = {
     'qwen': ChatTongyi,
     'baichuan': ChatBaichuan,
     'ollama': ChatOpenAI,
-    'deepseek': ChatOpenAI
+    'deepseek': ChatOpenAI,
+    'deepseek2': ChatOpenAI,
+    'qianwen': ChatOpenAI
 }
 
 MODEL_KWARGS = {
@@ -59,9 +61,22 @@ MODEL_KWARGS = {
         'api_key': 'ollama'
     },    
     "deepseek": {
-        'model': 'deepseek-chat',
+        # 'model': 'deepseek-chat',
+        'model': 'deepseek-reasoner',
         'base_url': 'https://api.deepseek.com',
         'api_key': os.getenv('DEEPSEEK_API_KEY')      
+    },
+    "deepseek2": {
+        # 'model': 'deepseek-ai/DeepSeek-V3',
+        'model': 'deepseek-ai/DeepSeek-R1',
+        'base_url': 'https://api.siliconflow.cn/v1',
+        'api_key': os.getenv('SILLICON_API_KEY')      
+    },
+    "qianwen": {
+        'model': 'qwq-32b',
+        'base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        'api_key': os.getenv('QIANWEN_API_KEY'),
+        'stream': True      
     }
 }
 
@@ -117,14 +132,15 @@ class ModelCommLangchain():
         self.cb = [TokenHandler(self.model_name, self.history_output_tokens)]
     
     def communicate_with_model(self, message):
-        self.save_txt(message)           
-        try:   
-            resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
-        except:
-            # resp = {'response':"the API seems G. "}
-            # resp = {'response':"  网络通信超时，当前网络状况不佳，被迫跳过该步骤。"}
-            print("网络通信超时，当前网络状况不佳，被迫跳过该步骤。")
-            resp = {'response':" "}
+        self.save_txt(message)      
+        resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})     
+        # try:   
+        #     resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
+        # except:
+        #     # resp = {'response':"the API seems G. "}
+        #     # resp = {'response':"  网络通信超时，当前网络状况不佳，被迫跳过该步骤。"}
+        #     print("网络通信超时，当前网络状况不佳，被迫跳过该步骤。")
+        #     resp = {'response':" "}
         # resp = self.chain.invoke([HumanMessage(content=message)], config={"callbacks": self.cb})
         resp_str = resp['response']
         self.save_txt(resp_str)
@@ -158,9 +174,12 @@ class ModelCommLangchain():
 if __name__ == '__main__':
     flag = 0
     if flag == 0 :
-        # communication = ModelCommLangchain(model_name='ollama')
+        # communication = ModelCommLangchain(model_name='qianwen')
         # communication = ModelCommLangchain(model_name='deepseek')
-        communication = ModelCommLangchain(model_name='zhipu')
+        # communication = ModelCommLangchain(model_name='zhipu')
+        # communication = ModelCommLangchain(model_name='deepseek2')
+        # communication = ModelCommLangchain(model_name='qianwen')
+        communication = ModelCommLangchain(model_name='qianwen',Comm_type="DeLLMa",role="none")
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
         #                 我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
