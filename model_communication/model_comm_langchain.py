@@ -12,6 +12,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_core.callbacks import BaseCallbackHandler
 
+from openai import OpenAI
+
 import sys
 current_path = os.path.dirname(__file__)
 root_path = os.path.abspath(os.path.dirname(current_path) + os.path.sep + ".")
@@ -29,7 +31,8 @@ CHAT_MODELS = {
     'ollama': ChatOpenAI,
     'deepseek': ChatOpenAI,
     'deepseek2': ChatOpenAI,
-    'qianwen': ChatOpenAI
+    'qianwen': ChatOpenAI,
+    'qianwen2': ChatOpenAI
 }
 
 MODEL_KWARGS = {
@@ -68,6 +71,7 @@ MODEL_KWARGS = {
     },
     "deepseek2": {
         # 'model': 'deepseek-ai/DeepSeek-V3',
+        # 'model': 'Pro/deepseek-ai/DeepSeek-R1',
         'model': 'deepseek-ai/DeepSeek-R1',
         'base_url': 'https://api.siliconflow.cn/v1',
         'api_key': os.getenv('SILLICON_API_KEY')      
@@ -77,7 +81,12 @@ MODEL_KWARGS = {
         'base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
         'api_key': os.getenv('QIANWEN_API_KEY'),
         'stream': True      
-    }
+    },
+    "qianwen2": {
+        'model': 'Qwen/QwQ-32B',
+        'base_url': 'https://api.siliconflow.cn/v1',
+        'api_key': os.getenv('SILLICON_API_KEY')  
+    }    
 }
 
 class TokenHandler(BaseCallbackHandler):
@@ -130,22 +139,90 @@ class ModelCommLangchain():
         )
         self.msgs = self.chain.memory.buffer
         self.cb = [TokenHandler(self.model_name, self.history_output_tokens)]
+
+        if model_name == 'qianwen':
+            self.__init_stream()
+
+    def __init_stream(self):
+        # 这段是为了兼容流式输出的初始化，目前只有千问推理模型需要这个。
+        # 到这里相当于是脱离langchain了。
+
+        model_kargs = MODEL_KWARGS[self.model_name]
+        # 初始化OpenAI客户端
+        self.client = OpenAI(
+            # 如果没有配置环境变量，请用百炼API Key替换：api_key="sk-xxx"
+            api_key = model_kargs["api_key"],
+            base_url=model_kargs["base_url"]
+        )
+        pass
     
     def communicate_with_model(self, message):
-        self.save_txt(message)      
-        resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})     
-        # try:   
-        #     resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
-        # except:
-        #     # resp = {'response':"the API seems G. "}
-        #     # resp = {'response':"  网络通信超时，当前网络状况不佳，被迫跳过该步骤。"}
-        #     print("网络通信超时，当前网络状况不佳，被迫跳过该步骤。")
-        #     resp = {'response':" "}
-        # resp = self.chain.invoke([HumanMessage(content=message)], config={"callbacks": self.cb})
-        resp_str = resp['response']
+        self.save_txt(message)    
+        if MODEL_KWARGS[self.model_name].get("stream", False):
+            resp_str = self.communicate_with_model_stream(message)
+        else:
+            resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})     
+ 
+            # try:   
+            #     resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})
+            # except:
+            #     # resp = {'response':"the API seems G. "}
+            #     # resp = {'response':"  网络通信超时，当前网络状况不佳，被迫跳过该步骤。"}
+            #     print("网络通信超时，当前网络状况不佳，被迫跳过该步骤。")
+            #     resp = {'response':" "}
+            # resp = self.chain.invoke([HumanMessage(content=message)], config={"callbacks": self.cb})
+            resp_str = resp['response']
         self.save_txt(resp_str)
         return resp_str
-        
+
+    def communicate_with_model_stream(self, message):
+        # 流式输出要的是不一样的玩法，得专门实现一个。目前只有千问推理模型是必须使用Steam模式的。
+
+        # 初始化OpenAI客户端
+        client = self.client
+
+        reasoning_content = ""  # 定义完整思考过程
+        answer_content = ""     # 定义完整回复
+        is_answering = False   # 判断是否结束思考过程并开始回复
+        model_kargs = MODEL_KWARGS[self.model_name]
+
+        # 创建聊天完成请求
+        completion = client.chat.completions.create(
+            model=model_kargs["model"],  # 此处以 qwq-32b 为例，可按需更换模型名称
+            messages=[
+                {"role": "user", "content": message}
+            ],
+            # QwQ 模型仅支持流式输出方式调用
+            stream=True,
+            # 解除以下注释会在最后一个chunk返回Token使用量
+            # stream_options={
+            #     "include_usage": True
+            # }
+        )
+
+        print("\n" + "=" * 20 + "思考过程" + "=" * 20 + "\n")
+
+        for chunk in completion:
+            # 如果chunk.choices为空，则打印usage
+            if not chunk.choices:
+                print("\nUsage:")
+                print(chunk.usage)
+            else:
+                delta = chunk.choices[0].delta
+                # 打印思考过程
+                if hasattr(delta, 'reasoning_content') and delta.reasoning_content != None:
+                    print(delta.reasoning_content, end='', flush=True)
+                    reasoning_content += delta.reasoning_content
+                else:
+                    # 开始回复
+                    if delta.content != "" and is_answering is False:
+                        print("\n" + "=" * 20 + "完整回复" + "=" * 20 + "\n")
+                        is_answering = True
+                    # 打印回复过程
+                    print(delta.content, end='', flush=True)
+                    answer_content += delta.content  
+
+        return answer_content     
     
     # 基础功能，直接从骁翰那里抄了
     def load_txt(self,file_name):
@@ -178,7 +255,7 @@ if __name__ == '__main__':
         # communication = ModelCommLangchain(model_name='deepseek')
         # communication = ModelCommLangchain(model_name='zhipu')
         # communication = ModelCommLangchain(model_name='deepseek2')
-        # communication = ModelCommLangchain(model_name='qianwen')
+        # communication = ModelCommLangchain(model_name='qianwen2')
         communication = ModelCommLangchain(model_name='qianwen',Comm_type="DeLLMa",role="none")
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
@@ -205,3 +282,54 @@ if __name__ == '__main__':
         )
 
         print(response.choices[0].message.content)
+    elif flag == 2:
+        from openai import OpenAI
+        import os
+
+        # 初始化OpenAI客户端
+        client = OpenAI(
+            # 如果没有配置环境变量，请用百炼API Key替换：api_key="sk-xxx"
+            api_key = os.getenv("QIANWEN_API_KEY"),
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+        )
+
+        reasoning_content = ""  # 定义完整思考过程
+        answer_content = ""     # 定义完整回复
+        is_answering = False   # 判断是否结束思考过程并开始回复
+
+        # 创建聊天完成请求
+        completion = client.chat.completions.create(
+            model="qwq-32b",  # 此处以 qwq-32b 为例，可按需更换模型名称
+            messages=[
+                {"role": "user", "content": "9.9和9.11谁大"}
+            ],
+            # QwQ 模型仅支持流式输出方式调用
+            stream=True,
+            # 解除以下注释会在最后一个chunk返回Token使用量
+            # stream_options={
+            #     "include_usage": True
+            # }
+        )
+
+        print("\n" + "=" * 20 + "思考过程" + "=" * 20 + "\n")
+
+        for chunk in completion:
+            # 如果chunk.choices为空，则打印usage
+            if not chunk.choices:
+                print("\nUsage:")
+                print(chunk.usage)
+            else:
+                delta = chunk.choices[0].delta
+                # 打印思考过程
+                if hasattr(delta, 'reasoning_content') and delta.reasoning_content != None:
+                    print(delta.reasoning_content, end='', flush=True)
+                    reasoning_content += delta.reasoning_content
+                else:
+                    # 开始回复
+                    if delta.content != "" and is_answering is False:
+                        print("\n" + "=" * 20 + "完整回复" + "=" * 20 + "\n")
+                        is_answering = True
+                    # 打印回复过程
+                    print(delta.content, end='', flush=True)
+                    answer_content += delta.content
+

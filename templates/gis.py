@@ -74,7 +74,7 @@ if __name__ == '__main__':
     from model_communication.model_comm_langchain import ModelCommLangchain
     
     shishi_tt = text_transfer()
-    model_communication = ModelCommLangchain(model_name="deepseek",Comm_type="DeLLMa",role="none")
+    model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none")
 
     # 组装测试字符串，并进行测试。
     test_str_list = shishi_gis.get_gis_test_list()
