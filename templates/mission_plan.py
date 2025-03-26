@@ -78,15 +78,15 @@ class mission_plan():
 
         if force_arrange == "坦克和自行迫榴炮":
             # 那默认任务就是向北进攻。
-            next_mission_json["任务类型"] = "陆地进攻"
+            next_mission_json["类型"] = "陆地进攻"
             pass
         elif force_arrange ==  "装甲车等其他地面力量":
             # 那默认任务本来应该是过去汇合，姑且也先用向北进攻好了。
-            next_mission_json["任务类型"] = "陆地进攻"
+            next_mission_json["类型"] = "陆地进攻"
             pass
         elif force_arrange == "无人机和巡飞弹":
             # 那默认任务就是去侦查。
-            next_mission_json["任务类型"] = "空中侦察"
+            next_mission_json["类型"] = "空中侦察"
             pass 
 
         next_mission_json["参加单位"] = force_arrange

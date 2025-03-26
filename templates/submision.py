@@ -77,6 +77,8 @@ class submission():
                 pos_start = np.array([100.137, 13.644])
             else:
                 raise Exception("invalid direction")
+        else:
+            return # 这个是如果是none或者啥怪东西，就直接return了。
         
         # pos_start = np.array([100.15427471282, 13.60603147549])
         pos_end = np.array([100.1247, 13.6615])
