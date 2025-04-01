@@ -14,6 +14,9 @@ class gis():
         self.gis_type_dict["道路"] = "道路能加速地面部队移动，不影响空中单位和火力打击，地面单位可以从道路任意位置上下道路。由多个坐标点的连线表示，认为坐标点之间道路较直。"
 
         self.gis_data_dict = {} 
+        
+        self.set_gis_ldjs2024()
+        print("gis.__init__: set_gis_ldjs2024 done")
 
     def set_gis_ldjs2024(self):
         self.gis_data_dict["建筑物1"] = {"坐标":[100.116,13.643]}

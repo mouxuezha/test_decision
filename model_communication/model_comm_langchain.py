@@ -64,8 +64,8 @@ MODEL_KWARGS = {
         'api_key': 'ollama'
     },    
     "deepseek": {
-        # 'model': 'deepseek-chat',
-        'model': 'deepseek-reasoner',
+        'model': 'deepseek-chat',
+        # 'model': 'deepseek-reasoner',
         'base_url': 'https://api.deepseek.com',
         'api_key': os.getenv('DEEPSEEK_API_KEY')      
     },

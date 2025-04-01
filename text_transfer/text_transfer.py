@@ -1,9 +1,14 @@
 # 该删除的删除，防止变成屎山。这个在新的环境下要配合着DeLLMa使用了。
 # 需要约定一下命令格式了。
+import os.path
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import math
 import json
 from typing import Optional, Dict, List, Tuple, Callable
 import random,copy 
+from templates.gis import gis
 
 class text_transfer(object):
     def __init__(self) -> None:
@@ -16,6 +21,8 @@ class text_transfer(object):
         self.__init_type()
 
         self.__init_DeLLMa()
+
+        self.gis=gis()
 
     
     def __init_type(self):
@@ -438,9 +445,12 @@ class text_transfer(object):
     # 这几个prepare开头的是服务于DeLLMa的。
     def prepare_context(self,status=[],**kargs):
         # how the context is prepared
-        # 加了相对专业一些的gis数据处理，
-        if "gis_str" in kargs:
-            gis_str = kargs["gis_str"]
+        # 加了相对专业一些的gis数据处理，讲道理。
+        # 这东西引用的地方有点多，还是直接在这里改吧。
+        if ("gis_str" in kargs) or True:
+            # gis_str = kargs["gis_str"]
+            print("prepare_context: gis str enabled.")
+            gis_str = self.gis.get_gis_str()
         else:
             gis_str = "地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标[100.116,13.643]，[100.137,13.644]，[100.164,13.658]有东、中、西三个可供步兵占领和防御的建筑物。它们之间有公路和桥梁相连，在中间那座建筑物附近跨越一条南北向河流。在此条公路以北地区，不再有东西方向桥梁供通行，但可以在适当位置隔河打击敌方目标。" # 这个是原版的，随便写了几句，放这里是为了保持兼容性。
 

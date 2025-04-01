@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from templates.mission_plan import mission_plan
+# from templates.gis import gis
 from text_transfer.stage_prompt import StagePrompt
 from text_transfer.text_transfer import *
 import pickle 
@@ -20,6 +21,7 @@ class mission_arrange:
         self.plan_list = [] # 这个还是得存的嘛。
         self.communicator = communicator # 把交互那个的引用传进来，在适当的时候print一些东西到前端，反正异步的。
         self.text_transfer = text_transfer()
+        # self.gis=gis()
 
     def get_one_plan(self,**kargs):
         # 引入用于实现多方案的Prompt。
@@ -195,7 +197,7 @@ class mission_arrange:
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
-    flag = 1
+    flag = 0
     if flag == 0:
         plan_num = 3
         shishi = mission_arrange()
