@@ -32,7 +32,8 @@ CHAT_MODELS = {
     'deepseek': ChatOpenAI,
     'deepseek2': ChatOpenAI,
     'qianwen': ChatOpenAI,
-    'qianwen2': ChatOpenAI
+    'qianwen2': ChatOpenAI,
+    'local': ChatOpenAI
 }
 
 MODEL_KWARGS = {
@@ -86,7 +87,12 @@ MODEL_KWARGS = {
         'model': 'Qwen/QwQ-32B',
         'base_url': 'https://api.siliconflow.cn/v1',
         'api_key': os.getenv('SILLICON_API_KEY')  
-    }    
+    },  
+    "local": {
+        'model': "deepseek-r1:14b",
+        'base_url': "http://localhost:11434/v1",
+        'api_key': 'ollama'
+    }  
 }
 
 class TokenHandler(BaseCallbackHandler):
@@ -256,7 +262,8 @@ if __name__ == '__main__':
         # communication = ModelCommLangchain(model_name='zhipu')
         # communication = ModelCommLangchain(model_name='deepseek2')
         # communication = ModelCommLangchain(model_name='qianwen2')
-        communication = ModelCommLangchain(model_name='qianwen',Comm_type="DeLLMa",role="none")
+        # communication = ModelCommLangchain(model_name='qianwen',Comm_type="DeLLMa",role="none")
+        communication = ModelCommLangchain(model_name='local',Comm_type="DeLLMa",role="none")
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
         #                 我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
