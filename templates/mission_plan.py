@@ -5,14 +5,22 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from DeLLMa.DeLLMa import *
 
 from templates.submision import *
+from text_transfer.text_transfer import text_transfer # 主要是要用到这里面的文字压缩功能。
 
 class mission_plan():
-    def __init__(self):
+    def __init__(self,**kargs):
         self.id_str = "none"
         self.target_str = "none"
         self.force_arrange = [] 
         self.submission_list = []
         self.DeLLMa = DeLLMa()
+
+        # 把auto_run传进来，
+        if "communicator" in kargs:
+            self.communicator = kargs["communicator"]
+        else:
+            self.communicator = None
+        self.DeLLMa.set_communicator(communicator=self.communicator)
     
     def set_users_goal(self, G:str):
         # 这个是用来对某个任务设定目标的。明确:论文里的users goal G和这里代码里的target str，道理上就是一回事儿。

@@ -19,7 +19,7 @@ class DeLLMa():
         self.text_transfer= text_transfer()
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
-        self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none") # "qianfan" 
+        self.model_communication = ModelCommLangchain(model_name="local",Comm_type="DeLLMa",role="none") # "qianfan" 
 
         self.unit_type = unit_type 
         
@@ -27,8 +27,14 @@ class DeLLMa():
         
         self.output_docx = output_docx()
         self.output_docx.set_heading("多军兵种联合陆地攻防作战场景下任务分配案例")
+
+        self.set_communicator()
         
-    
+    def set_communicator(self,communicator=None):
+        # 这个就是封装太多层了造成的蛋疼，要把大模型的东西传出去还少不得一番折腾。
+        # 也好，这波改完之后方便调试了。
+        self.communicator = communicator
+
     def set_config_assist(self,**kargs):
         self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。
 
@@ -228,7 +234,10 @@ class DeLLMa():
         if flag_comm:
             response_str = self.model_communication.communicate_with_model(state_enumeration_prompt)
 
-
+        if self.communicator != None:
+            # 那就压缩一下然后传了
+            response_str_squeeze = self.text_transfer.str_squeeze(response_str)
+            self.communicator.send_response(response_str_squeeze)
         # print(response_str)
         self.restore_jieguo(response_str,model="state")
 
@@ -264,6 +273,11 @@ class DeLLMa():
             response_str = self.model_communication.communicate_with_model(dellma_prompt)
 
         print(response_str)
+        if self.communicator != None:
+            # 那就压缩一下然后传了
+            response_str_squeeze = self.text_transfer.str_squeeze(response_str)
+            self.communicator.send_response(response_str_squeeze)
+
         self.restore_jieguo(response_str,model="utility")
 
         # 道理上到这里应该是转成JSON，然后根据如果侦测到什么态势，就改出相应的东西来？

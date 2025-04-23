@@ -1,6 +1,9 @@
 # 这个试图实现一个“根据当前的帧数判断是什么阶段”的东西，从而做一个“到一定步数就命令全员A到点里去”这样的。
 # TODO: 再做一个输入态势之后计算敌我啥的，然后生成一堆文字来描述态势的功能。
-
+import os.path
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from text_transfer.text_transfer import *
 
 class StagePrompt:
     def __init__(self, flag_kaiguan=True):
@@ -97,3 +100,27 @@ class StagePrompt:
         
         print("get_stage_prompt_plan: unfinished yet.")
         return plan_prompt
+    
+    def get_jiaocheng_prompt(self,index):
+        # 这个是教程的prompt，用来引导用户进行一些操作。
+        # 原则上会按顺序输出出去，这个尽量只用于给指挥员人类看。
+        
+        jiaocheng_prompt_list = [] 
+        # jiaocheng_prompt_list.append('教程：大模型方案生成工具可根据人类指挥员意图和预置的先验知识，生成特定场景下的作战方案，并驱动推演。以下进行示例。【输入任意字符继续】')
+        jiaocheng_prompt_list.append(text_yanshi2)
+        jiaocheng_prompt_list.append('教程：已加载陆火联合城镇攻防场景。我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战。我方自行迫榴炮具备较大的射程和载弹量，但只能在停下后攻击，坦克、无人突击车、无人机等则可以在移动中展开攻击。我方需要攻取位于经纬度坐标[100.1247, 13.6615]的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，导弹发射车不能机动，固定部署在远处以提供火力支援。推演以帧为单位推进，每一帧对应推演中的1秒，共进行5000帧，推演中装备的移动速度均与现实中类似，可据此估计双方位置。【输入任意字符继续】')
+        jiaocheng_prompt_list.append("教程：敌方为蓝方，初始部署位置为[100.1247, 13.6615]，拥有坦克、步兵战车、步兵、无人突击车、巡飞弹、无人机、防空导弹发射车等装备，在东、中、西建筑物内有驻守有蓝方步兵，防空导弹发射车固定部署在夺控点周围一定范围内，在未受打击时能够完全拦截我方导弹。推演开始后，蓝方地面单位将进行机动，靠近建筑物和交通线布防，并派遣巡飞弹、无人机等前出侦察。根据我方行动，敌方有可能沿交通线调动兵力，阻击我方单位前进。以推演结束时对夺控点的占领情况和战损比情况来确定胜负，我方地面单位机动到夺控点并保持40帧即可占领夺控点，战损比以双方分数计算，导弹发射车50分，坦克20分，装甲车辆和无人机15分，步兵和巡飞弹5分。因此，我方应该充分侦察，发挥地面火力优势，优先消灭对方防空导弹发射车后有效利用我方导弹打击敌地面目标。【输入任意字符继续】")   
+        jiaocheng_prompt_list.append("教程：例如，输入以下作战意图，开始方案生成：“"+self.get_stage_prompt_plan(0) + "”。【输入字符以继续】")
+        jiaocheng_prompt_list.append(self.get_stage_prompt_plan(0))
+        prompt_output = jiaocheng_prompt_list[index]
+        return prompt_output
+    
+    def get_one_plan_prompt(self,index):
+        # 这个的说法是，把指挥员的输入分成多次，尽量多来一些信息并且显得稍微智能一些。
+        one_plan_prompt_list = [] 
+        one_plan_prompt_list.append("提示：可通过指定全局进攻方向，避开敌防御正面，例如“向东迂回”\n【请键入指挥员意图】")
+        one_plan_prompt_list.append("提示：可通过指定特定编组进行控制，例如“巡飞弹前出至建筑物附近”\n【继续键入指挥员意图】")
+        one_plan_prompt_list.append("提示：可增加其他自然语言指令，例如“请先进行试探，在削弱敌方防御之后尝试占领夺控点。”\n【继续键入指挥员意图】")
+        one_plan_prompt_list.append("提示：输入完成，开始方案生成......")
+        prompt_output = one_plan_prompt_list[index]
+        return prompt_output

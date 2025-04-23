@@ -3,6 +3,7 @@ from support.Env import *
 from templates.commands import command_transfer
 from mission_arrange.mission_arrange import mission_arrange
 from text_transfer.text_transfer import text_transfer
+from text_transfer.stage_prompt import StagePrompt
 import argparse, queue, time,threading
 from concurrent.futures import ThreadPoolExecutor
 import time
@@ -34,6 +35,7 @@ class auto_run_comunicator():
         self.command_transfer = command_transfer()
         
         self.running_result = {} # 这个用来存那些个运行出来的中间结果，都是“有就用现成的，没有就现算一个或者没有就现读取一个”的逻辑
+        self.running_result["Planning"] = []
         pass
 
     def __init_envs(self):
@@ -41,8 +43,8 @@ class auto_run_comunicator():
         self.net_args = self.__init_net(ip = "127.0.0.1", port = 30001)
         self.max_episode_len = self.net_args.max_episode_len
         print("auto_run_comunicator: 绑定席位和IP地址...")
-        # env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是和图形用户界面交互
-        env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是本质上不和图形用户界面交互。
+        env_single = Env_server(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是和图形用户界面交互
+        # env_single = Env_server_debug(self.net_args.ip, self.net_args.port,seat="commandor") # 开这个，就是本质上不和图形用户界面交互。
         self.env_dict["commandor"] = env_single
         print("__init_envs: unfinished yet")
 
@@ -106,8 +108,6 @@ class auto_run_comunicator():
 
     def run_single_receive(self):
         # 这个是单线程的，无限循环写在这里面。
-
-
         while(True):
             time.sleep(1.14514)
             for seat in self.env_dict.keys():
@@ -148,8 +148,11 @@ class auto_run_comunicator():
                 receive_seat = "commandor"
                 
                 # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
-                # future = self.handle_threadpool.submit(self.handle_command_expedient,(receive_seat,receive_str))
-                future = self.handle_threadpool.submit(self.handle_command_expedient,receive_seat,receive_str) # 这个和threading不一样了，这个不用打括号了。
+                # future = self.handle_threadpool.submit(self.handle_command_expedient,receive_seat,receive_str) 
+                # 莲餐版本的展示。
+                future = self.handle_threadpool.submit(self.handle_command_liancan,receive_seat,receive_str)
+
+                # 这个和threading不一样了，这个不用打括号了。
                 jieguo = future.result() # 猜测是得调用result的时候才会真的执行，所以只写上面那句不写这里这句的话它不太行
 
         
@@ -225,6 +228,90 @@ class auto_run_comunicator():
 
         pass
     
+    def handle_command_liancan(self,seat="none",command="none"):
+        # 这个是做一个用于莲餐演示的脚本。道理上是Qt里面输入一次东西，这边就进一次这个。其实这种功能才应该是Qt该干的事情，但是pyqt难用的一笔。回头要是真搞的话，用户逻辑恐怕得弄到QtC++里面去实现，或者专门划分一层来实现用户逻辑。当然原则上现在这个auto_run就是用来实现用户逻辑的。
+
+        # 先来个教程，输出一些提示词，生成一个单个的方案，然后送到前端去。
+        flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
+        if flag_pass:
+            if (command_type == "方案生成") or (command_type == "root"):
+                # 那就是当前这条命令是方案生成的。
+                # 这里先来个教程。明确：发提示都是在这个里面。但是为了结构好看，可以在这里面写写之后传引用搬到mission plan里面去。
+                if not("index_jiaocheng" in self.config_dict):
+                    self.config_dict["index_jiaocheng"]  = 0 # 这个用来标注教程运行到第几步了。
+                if self.config_dict["index_jiaocheng"] < 4:
+                    self.handle_command_jiaocheng(seat,command) # 现在这个写法是先执行这个，这个执行完了就是下一个。
+                else :
+                    # 那就是一个一个一个地生成方案然后传过去
+                    # 先来一个带反馈信息的交互式方案生成。琢磨一下怎么搞。
+                    self.handle_command_one_plan(seat,command)
+
+        pass
+
+    def handle_command_jiaocheng(self,seat="none",command="none"):
+        # 这个是教程，得有大量的交互。其实就是生成一个就往后走一个
+        if not("index_jiaocheng" in self.config_dict):
+            self.config_dict["index_jiaocheng"]  = 0 # 这个用来标注教程运行到第几步了。
+        
+        if self.config_dict["index_jiaocheng"] < 4:
+            mission_arrange_single = StagePrompt()
+            prompt_output = mission_arrange_single.get_jiaocheng_prompt(self.config_dict["index_jiaocheng"])
+            # 然后输出到界面里面去。
+            self.send_response(prompt_output)
+
+            self.config_dict["index_jiaocheng"] = self.config_dict["index_jiaocheng"] + 1 
+        
+        if self.config_dict["index_jiaocheng"] == 4:
+            # 这里生成一波然后传输回去
+            prompt_output = mission_arrange_single.get_jiaocheng_prompt(self.config_dict["index_jiaocheng"])
+            self.handle_generate_one_plan(seat=seat, command=prompt_output)
+            self.config_dict["index_jiaocheng"] = self.config_dict["index_jiaocheng"] + 1             
+        if command == "再次演示":
+            # 那就重新开始教程
+            self.config_dict["index_jiaocheng"] = 0 
+        else:
+            pass
+
+    def handle_command_one_plan(self,seat="none",command="none"):
+        # 这波应该是一轮互动之后得到一个总的指挥员意图，然后后面的生成也好啥的也好，放不放在这里倒是还可以再看。
+        mission_arrange_single = StagePrompt()
+        if not "order_one_plan" in self.config_dict:
+            self.config_dict["order_one_plan"] = ""
+        if not("index_one_plan" in self.config_dict):
+            self.config_dict["index_one_plan"]  = 0 # 这个用来标注one plan运行到第几步了。
+
+        if self.config_dict["index_one_plan"] < 4:
+            # 那就是还在输命令.
+            prompt_output = mission_arrange_single.get_one_plan_prompt(self.config_dict["index_one_plan"])
+            self.send_response(prompt_output)
+            self.config_dict["index_one_plan"] = self.config_dict["index_one_plan"] + 1 
+
+            # 然后要等着从前端把东西读进来再下一步.或者说，本来就是得来了才会下一步，所以直接存就行了。
+            self.config_dict["order_one_plan"] = self.config_dict["order_one_plan"] + command
+        
+        if self.config_dict["index_one_plan"] == 4:
+            # 那就要搁这不断生成了。生成之后标志位+1，不然下一次来还得生成，就傻逼了。
+            # 但是问题是这里再加之后就是永远进不来这里了，也不是很好。
+            self.handle_generate_one_plan(seat=seat,command=command)
+            self.config_dict["index_one_plan"] = self.config_dict["index_one_plan"] + 1 
+        
+        if command == "再次生成":
+            # 那就重新开始教程
+            self.config_dict["index_one_plan"] = 0 
+        else:
+            pass
+
+    def handle_generate_one_plan(self,seat="none",command="none"):
+        # 这个就是交互式生成一个方案，或者说就是和大模型交互生成方案的过程中把相应的字符串传回去
+        # 不用全传其实，前多少个字符加后多少个字符加省略号就行。
+        mission_arrange_single = mission_arrange(communicator=self) 
+        plan_list = mission_arrange_single.main_loop(plan_num = 1,command=command)
+        # plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
+        
+        self.running_result["Planning"] = plan_list + self.running_result["Planning"] # 合并列表
+        self.send_plan(plan_list) # 传过去
+
+
     def handle_load_and_sort(self,seat="none",command="none"):
         # 这个原则上应该统一从handle_command里面去进入。但是总之先不管了先实现出来再调整从哪里进入。
 
@@ -261,7 +348,7 @@ class auto_run_comunicator():
 
         # 上来先发个默认的方案0过去，然后再说别的。# 如果不需要发方案0的话就把这段注了
         mission_arrange_void = mission_arrange(communicator=self)
-        plan_list_void=[]
+        plan_list_void = []
         plan_list_void.append(mission_arrange_void.get_void_plan())
         self.send_plan(plan_list_void)
         # 上来先发个默认的方案0过去，然后再说别的。# 如果不需要发方案0的话就把这段注了

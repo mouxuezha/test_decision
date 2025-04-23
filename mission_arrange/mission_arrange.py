@@ -38,7 +38,7 @@ class mission_arrange:
 
 
         # 在这里实现模块2的具体逻辑，根据参数生成出一个方案，返回一个方案对象。
-        one_plan = mission_plan()
+        one_plan = mission_plan(communicator=self.communicator)
 
         # 然后给它设定进去。
         if len(users_goal)>1:
@@ -84,13 +84,16 @@ class mission_arrange:
         one_plan.decide_void_submission()
         return one_plan
     
-    def main_loop(self, plan_num = 3):
+    def main_loop(self, plan_num = 3,**kargs):
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
         start_time = time.time()
         for index in range(plan_num):
             # index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
-            users_goal = self.input_prompt.get_stage_prompt_plan(index)
+            if "command" in kargs:
+                users_goal = kargs["command"]
+            else:
+                users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
             self.plan_list.append(jieguo)
         pass
@@ -194,6 +197,12 @@ class mission_arrange:
         submission_single_new.target_str = submodel_selected
         
         return submission_single_new
+    
+    def handle_script(self):
+        # 这个是处理脚本，先出一个教程
+
+        # 说一下这个是怎么个事儿。
+        pass
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
