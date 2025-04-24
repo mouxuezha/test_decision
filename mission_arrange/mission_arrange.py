@@ -152,6 +152,8 @@ class mission_arrange:
         try:
             plan.DeLLMa.output_docx = "为了保存整个对象，docx功能先关了。"
             plan.DeLLMa.model_communication = "为了保存整个对象，model_communication功能先关了。"
+            plan.DeLLMa.communicator = "为了保存整个对象，communicator先关了。"
+            plan.communicator = "为了保存整个对象，communicator先关了。"
         except:
             pass
 

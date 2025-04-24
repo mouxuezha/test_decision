@@ -238,7 +238,7 @@ class auto_run_comunicator():
                 # 那就是当前这条命令是方案生成的。
                 # 这里先来个教程。明确：发提示都是在这个里面。但是为了结构好看，可以在这里面写写之后传引用搬到mission plan里面去。
                 if not("index_jiaocheng" in self.config_dict):
-                    self.config_dict["index_jiaocheng"]  = 0 # 这个用来标注教程运行到第几步了。
+                    self.config_dict["index_jiaocheng"]  = 3 # 这个用来标注教程运行到第几步了。
                 if self.config_dict["index_jiaocheng"] < 4:
                     self.handle_command_jiaocheng(seat,command) # 现在这个写法是先执行这个，这个执行完了就是下一个。
                 else :
