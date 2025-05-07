@@ -67,7 +67,7 @@ class mission_arrange:
             next_report_str = one_plan.describe_last_submission()
             
             if not(self.communicator == "none"):
-                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str),color=2) # 这个直接传到前端去，并且保持兼容性。
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
             # 但是在调试的时候可以开了它，这样就容易给出结果。
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
@@ -138,7 +138,7 @@ class mission_arrange:
             bili =round((index+1) / geshu,3) 
             next_report_str = more_str + " 当前进度：" +f"{bili*100}%" + "，生成子任务：" + next_report_str 
             if not(self.communicator == "none"):
-                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str),color=1) # 这个直接传到前端去，并且保持兼容性。
             # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):

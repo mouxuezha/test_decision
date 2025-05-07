@@ -167,11 +167,11 @@ class auto_run_comunicator():
         # 直接卸载run single 里面了，总共没几行。
         pass
 
-    def send_response(self,response_str:str):
+    def send_response(self,response_str:str,color=1):
         # 这次在后端就分开，显示的命令是显示的命令，增加点儿掌控力.这个是通用的入队列的说法。
         # 这里所谓发送，其实就是放进队列里面去的意思嘛。发回去的就不用分什么席位了。
         if not("SchemesDataList" in response_str):
-            response_str = self.text_transfer.response_wrap(response_str)
+            response_str = self.text_transfer.response_wrap(response_str,color=1)
             print("send_response: warning, invalide json, auto-fixed.")
         self.send_queue.put(response_str)
         pass 
@@ -238,7 +238,7 @@ class auto_run_comunicator():
                 # 那就是当前这条命令是方案生成的。
                 # 这里先来个教程。明确：发提示都是在这个里面。但是为了结构好看，可以在这里面写写之后传引用搬到mission plan里面去。
                 if not("index_jiaocheng" in self.config_dict):
-                    self.config_dict["index_jiaocheng"]  = 3 # 这个用来标注教程运行到第几步了。
+                    self.config_dict["index_jiaocheng"]  = 0 # 这个用来标注教程运行到第几步了。
                 if self.config_dict["index_jiaocheng"] < 4:
                     self.handle_command_jiaocheng(seat,command) # 现在这个写法是先执行这个，这个执行完了就是下一个。
                 else :
@@ -257,7 +257,7 @@ class auto_run_comunicator():
             mission_arrange_single = StagePrompt()
             prompt_output = mission_arrange_single.get_jiaocheng_prompt(self.config_dict["index_jiaocheng"])
             # 然后输出到界面里面去。
-            self.send_response(prompt_output)
+            self.send_response(prompt_output,color=0)
 
             self.config_dict["index_jiaocheng"] = self.config_dict["index_jiaocheng"] + 1 
         

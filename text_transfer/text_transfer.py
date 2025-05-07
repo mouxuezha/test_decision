@@ -430,7 +430,7 @@ class text_transfer(object):
         for key in json_jieguo:
             json_str += key+":"
             for key2 in json_jieguo[key]:
-                json_str += "“"+key2 + "”：“"+json_jieguo[key][key2] + "”,"
+                json_str += "“"+key2 + "”：“"+str(json_jieguo[key][key2]) + "”,"
             json_str += "\n"
         return json_str
     
@@ -675,9 +675,9 @@ class text_transfer(object):
 
         return submission_single_dict
     
-    def response_wrap(self, response_str:str):
-        # 这个是包装一下
-        wrapped_str = "{\"SchemesDataList\":[],\"msgCommid\":\""+response_str+"\"}"        
+    def response_wrap(self, response_str:str, color = 1 ):
+        # 这个是包装一下 # 这边有颜色显示，0,：白的，123：彩色。
+        wrapped_str = "{\"SchemesDataList\":[],\"msgCommid\":\""+response_str+"\", \"color\" : "+str(color)+"}"        
         return wrapped_str
 
     def generate_ECM_model(self):
@@ -719,26 +719,31 @@ class text_transfer(object):
 
     def str_squeeze(self,str_input,len_max=300):
         # 这个就是如果字符串太多了就把中间部分略去，搞成显示出来不那么抽象的效果。
+        flag = False
+        if flag:
+            # 这个是选择开不开压缩功能了。直接在这里关比到处找引用来得快。
         
-        len_qian = int(len_max*2/3) 
-        len_hou = int(len_max*1/3)
-        
-        # 先前处理一下
-        str_input = self.clean_the_str2(str_input)
-        zishu = len(str_input)
-
-        if zishu > len_max:
-            # 那就启动压缩。
+            len_qian = int(len_max*2/3) 
+            len_hou = int(len_max*1/3)
             
-            str_qian = str_input[0:len_qian]
-            str_hou = str_input[zishu-len_hou:-1]
-            str_zhongjian = "……【过长显示已折叠】……"
-            str_output = str_qian + str_zhongjian + str_hou
+            # 先前处理一下
+            str_input = self.clean_the_str2(str_input)
+            zishu = len(str_input)
+
+            if zishu > len_max:
+                # 那就启动压缩。
+                
+                str_qian = str_input[0:len_qian]
+                str_hou = str_input[zishu-len_hou:-1]
+                str_zhongjian = "……【过长显示已折叠】……"
+                str_output = str_qian + str_zhongjian + str_hou
+            else:
+                str_output = str_input
         else:
             str_output = str_input
         
         return str_output
-
+    
 class type_transfer(object):
     # 这个是用来把抽象的装备类型化简一下的，搞成中文的。
     def __init__(self):
