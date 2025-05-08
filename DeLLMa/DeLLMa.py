@@ -237,7 +237,7 @@ class DeLLMa():
         if self.communicator != None:
             # 那就压缩一下然后传了
             response_str_squeeze = self.text_transfer.str_squeeze(response_str)
-            self.communicator.send_response(response_str_squeeze)
+            self.communicator.send_response(response_str_squeeze,color=1)
         # print(response_str)
         self.restore_jieguo(response_str,model="state")
 
@@ -276,7 +276,7 @@ class DeLLMa():
         if self.communicator != None:
             # 那就压缩一下然后传了
             response_str_squeeze = self.text_transfer.str_squeeze(response_str)
-            self.communicator.send_response(response_str_squeeze)
+            self.communicator.send_response(response_str_squeeze,color=1)
 
         self.restore_jieguo(response_str,model="utility")
 

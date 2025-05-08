@@ -603,7 +603,9 @@ class text_transfer(object):
             plan_list_str += plan_single_str + ","
 
         plan_list_str = plan_list_str[0:-1] # 删除一个多余的逗号
-        plan_list_str += "],\"msgCommid\":\"\"}" 
+        # plan_list_str += "],\"msgCommid\":\"\"}" 
+        # 这里得加一个默认的颜色，用来和新的结构对应上
+        plan_list_str += "],\"msgCommid\":\"\",\"color\":"+str(1)+"}" 
         return plan_list_str
     
     def plan_single_to_str(self,plan_single):
@@ -677,6 +679,10 @@ class text_transfer(object):
     
     def response_wrap(self, response_str:str, color = 1 ):
         # 这个是包装一下 # 这边有颜色显示，0,：白的，123：彩色。
+        response_str = self.clean_the_str(response_str)
+        response_str = self.clean_the_str2(response_str)
+        if "帧期间" in response_str:
+            color = 2 
         wrapped_str = "{\"SchemesDataList\":[],\"msgCommid\":\""+response_str+"\", \"color\" : "+str(color)+"}"        
         return wrapped_str
 

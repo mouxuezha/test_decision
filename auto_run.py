@@ -171,7 +171,7 @@ class auto_run_comunicator():
         # 这次在后端就分开，显示的命令是显示的命令，增加点儿掌控力.这个是通用的入队列的说法。
         # 这里所谓发送，其实就是放进队列里面去的意思嘛。发回去的就不用分什么席位了。
         if not("SchemesDataList" in response_str):
-            response_str = self.text_transfer.response_wrap(response_str,color=1)
+            response_str = self.text_transfer.response_wrap(response_str,color=color)
             print("send_response: warning, invalide json, auto-fixed.")
         self.send_queue.put(response_str)
         pass 
@@ -257,7 +257,7 @@ class auto_run_comunicator():
             mission_arrange_single = StagePrompt()
             prompt_output = mission_arrange_single.get_jiaocheng_prompt(self.config_dict["index_jiaocheng"])
             # 然后输出到界面里面去。
-            self.send_response(prompt_output,color=0)
+            self.send_response(prompt_output,color=3)
 
             self.config_dict["index_jiaocheng"] = self.config_dict["index_jiaocheng"] + 1 
         
@@ -283,7 +283,7 @@ class auto_run_comunicator():
         if self.config_dict["index_one_plan"] < 4:
             # 那就是还在输命令.
             prompt_output = mission_arrange_single.get_one_plan_prompt(self.config_dict["index_one_plan"])
-            self.send_response(prompt_output)
+            self.send_response(prompt_output,color=2)
             self.config_dict["index_one_plan"] = self.config_dict["index_one_plan"] + 1 
 
             # 然后要等着从前端把东西读进来再下一步.或者说，本来就是得来了才会下一步，所以直接存就行了。
