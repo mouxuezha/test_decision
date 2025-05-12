@@ -150,3 +150,7 @@ TODO：
 设想一些颜色。
 思考过程用不怎么显眼一点的颜色，比如浅蓝色甚至深蓝色，因为背景就是蓝的。
 然后结果部分来点反差？比如黄的或浅蓝的。
+
+D: & cd D:\EnglishMulu\test_decision & D:\software\anaconda3\envs\shishi_MQ_with_LLM\python.exe auto_run.py 
+
+D: & cd D:/EnglishMulu/test_decision & start /B D:/software/anaconda3/envs/shishi_MQ_with_LLM/python.exe auto_run.py 

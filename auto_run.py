@@ -245,9 +245,17 @@ class auto_run_comunicator():
                     # 那就是一个一个一个地生成方案然后传过去
                     # 先来一个带反馈信息的交互式方案生成。琢磨一下怎么搞。
                     self.handle_command_one_plan(seat,command)
-
         pass
-
+        # 先来个教程，输出一些提示词，生成一个单个的方案，然后送到前端去。
+        flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
+    def handle_command_liancan2(self,seat="none",command="none"):
+        # 这个是改版的莲餐演示，直接来了，跳过教程部分了
+        # 先来个教程，输出一些提示词，生成一个单个的方案，然后送到前端去。
+        flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
+        if flag_pass:
+            if (command_type == "方案生成") or (command_type == "root"):
+                self.handle_command_one_plan(seat,command)
+                           
     def handle_command_jiaocheng(self,seat="none",command="none"):
         # 这个是教程，得有大量的交互。其实就是生成一个就往后走一个
         if not("index_jiaocheng" in self.config_dict):
@@ -280,7 +288,7 @@ class auto_run_comunicator():
         if not("index_one_plan" in self.config_dict):
             self.config_dict["index_one_plan"]  = 0 # 这个用来标注one plan运行到第几步了。
 
-        if self.config_dict["index_one_plan"] < 4:
+        if self.config_dict["index_one_plan"] < 5:
             # 那就是还在输命令.
             prompt_output = mission_arrange_single.get_one_plan_prompt(self.config_dict["index_one_plan"])
             self.send_response(prompt_output,color=2)
@@ -289,15 +297,16 @@ class auto_run_comunicator():
             # 然后要等着从前端把东西读进来再下一步.或者说，本来就是得来了才会下一步，所以直接存就行了。
             self.config_dict["order_one_plan"] = self.config_dict["order_one_plan"] + command
         
-        if self.config_dict["index_one_plan"] == 4:
+        if self.config_dict["index_one_plan"] == 5:
             # 那就要搁这不断生成了。生成之后标志位+1，不然下一次来还得生成，就傻逼了。
             # 但是问题是这里再加之后就是永远进不来这里了，也不是很好。
-            self.handle_generate_one_plan(seat=seat,command=command)
+            self.handle_generate_one_plan(seat=seat,command=self.config_dict["order_one_plan"])
             self.config_dict["index_one_plan"] = self.config_dict["index_one_plan"] + 1 
         
         if command == "再次生成":
             # 那就重新开始教程
             self.config_dict["index_one_plan"] = 0 
+            self.config_dict["order_one_plan"] = ""
         else:
             pass
 
