@@ -156,3 +156,6 @@ D: & cd D:\EnglishMulu\test_decision & D:\software\anaconda3\envs\shishi_MQ_with
 D: & cd D:/EnglishMulu/test_decision & start /B D:/software/anaconda3/envs/shishi_MQ_with_LLM/python.exe auto_run.py 
 
 后续还得定制一些个东西用来产生任务数据，服务于那个表格的显示。
+
+好，完事了，后续要准备挪到演示电脑上去了。就算要改也是挪进去之后再改了，所以现在给它冲了可也。
+一个理解：应该确保我这部分是稳健的。

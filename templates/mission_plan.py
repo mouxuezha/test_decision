@@ -126,9 +126,9 @@ class mission_plan():
         dict_single["平台"] = submission_single.force_arrange 
         dict_single["出发地点"] = "红方机动阵位"
         dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
-        
+
         # 然后任务这里定制一些说法
-        if submission_single.time_arrange[0] < 1001:
+        if submission_single.time_arrange[0] < 999:
             # 这里面的都写成侦查阶段
             if submission_single.force_arrange == "无人机和巡飞弹":
                 dict_single["任务"] = "空中侦察"
@@ -182,8 +182,30 @@ class mission_plan():
             dict_single["平台"] = submission_single.force_arrange 
             dict_single["出发地点"] = "红方机动阵位"
             dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+        
+        # 加两个空行看看。
+        dict_single["目标"] = "\n" + dict_single["目标"] + "\n"
+
+        # 转一下格式，给雪楠哥那边方便做序列化。
+        transfer_dict = {}
+        transfer_dict["num"] = "序号"
+        transfer_dict["platform"] = "平台"
+        transfer_dict["strBeginPos"] = "出发地点"
+        transfer_dict["strBeginTime"] = "出发时间"
+        transfer_dict["strTask"] = "任务"
+        transfer_dict["strWeapon"] = "挂载"
+        transfer_dict["strTarget"] = "目标"
+        
+        dict_single2 = {} 
+        for key_singe in transfer_dict:
+            try:
+                dict_single2[key_singe] = dict_single[transfer_dict[key_singe]]
+            except:
+                dict_single2[key_singe] = "传输失败"
+
 
         # dict_single["任务"] = submission_single.type_str
+        return dict_single2
 
     
     def get_planned_prompt(self):

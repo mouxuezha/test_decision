@@ -645,7 +645,8 @@ class text_transfer(object):
         all_dict["SchemesDataList"] = submission_dict
         all_dict["msgCommid"] = ""
         all_dict["color"] = 0
-        submission_str = json.dumps(all_dict,ensure_ascii=False)
+        # submission_str = json.dumps(all_dict,ensure_ascii=False)
+        submission_str = json.dumps(submission_dict, ensure_ascii=False)
         return submission_str
 
     def submission_single_to_ECM(self,submission_single,index=0):
@@ -719,8 +720,11 @@ class text_transfer(object):
         for key_str in list(state_forcaste.keys()):
             state_forcaste_str += key_str
             state_forcaste_str += "："
+            try:
+                kenengxing_list = list(state_forcaste[key_str].keys())
+            except:
+                kenengxing_list = [] # 解析不出来就算了，反正拼接文字的，拉了一点儿也不是太有所谓。
 
-            kenengxing_list = list(state_forcaste[key_str].keys())
             for i in range(len(kenengxing_list)):
                 kenengxing_key = kenengxing_list[i]
                 kenengxing_value = state_forcaste[key_str][kenengxing_key]

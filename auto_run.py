@@ -150,7 +150,7 @@ class auto_run_comunicator():
                 # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
                 # future = self.handle_threadpool.submit(self.handle_command_expedient,receive_seat,receive_str) 
                 # 莲餐版本的展示。
-                future = self.handle_threadpool.submit(self.handle_command_liancan,receive_seat,receive_str)
+                future = self.handle_threadpool.submit(self.handle_command_liancan2,receive_seat,receive_str)
 
                 # 这个和threading不一样了，这个不用打括号了。
                 jieguo = future.result() # 猜测是得调用result的时候才会真的执行，所以只写上面那句不写这里这句的话它不太行
@@ -174,7 +174,10 @@ class auto_run_comunicator():
             response_str = self.text_transfer.response_wrap(response_str,color=color)
             print("send_response: warning, invalide json, auto-fixed.")
         self.send_queue.put(response_str)
-        pass 
+        pass
+    def send_response2(self,response_str:str,color=1): 
+        # 纯白板的直接发。
+        self.send_queue.put(response_str)
 
     def send_plan(self,new_plans:list):
         # 把多方案解析解析，给GUI发过去。
@@ -199,8 +202,9 @@ class auto_run_comunicator():
         # 这个是服务于弹出表格里一行行显示的。每次发送一条数据。
         submission_dict_str = self.text_transfer.submission_dict_to_str(submission_dict)
 
-        self.send_response(submission_dict_str)
-        
+        # self.send_response(submission_dict_str)
+        self.send_response2(submission_dict_str)
+
         pass
 
     def send_evaluate(self, pinggu):
@@ -294,7 +298,7 @@ class auto_run_comunicator():
         if not "order_one_plan" in self.config_dict:
             self.config_dict["order_one_plan"] = ""
         if not("index_one_plan" in self.config_dict):
-            self.config_dict["index_one_plan"]  = 0 # 这个用来标注one plan运行到第几步了。
+            self.config_dict["index_one_plan"]  = 5 # 这个用来标注one plan运行到第几步了。
 
         if self.config_dict["index_one_plan"] < 5:
             # 那就是还在输命令.

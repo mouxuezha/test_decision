@@ -306,7 +306,10 @@ class DeLLMa():
             print("DeLLMa: get_next_mission fail, invalid selected_str.")
             index_selected = 0 
 
-        selected_state_action_pair = state_action_pair_list[index_selected]
+        try:
+            selected_state_action_pair = state_action_pair_list[index_selected]
+        except:
+            selected_state_action_pair = state_action_pair_list[-1]
 
         next_mission_str = selected_state_action_pair["action"]
 
