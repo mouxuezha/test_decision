@@ -640,6 +640,14 @@ class text_transfer(object):
         
         return plan_singe_str
     
+    def submission_dict_to_str(self,submission_dict):
+        all_dict = {}
+        all_dict["SchemesDataList"] = submission_dict
+        all_dict["msgCommid"] = ""
+        all_dict["color"] = 0
+        submission_str = json.dumps(all_dict,ensure_ascii=False)
+        return submission_str
+
     def submission_single_to_ECM(self,submission_single,index=0):
         # 修改生成电子战方案。原则上不应该放这里的，不过不管了下次一定。
         submission_single_new = copy.deepcopy(submission_single)

@@ -114,6 +114,76 @@ class mission_plan():
         str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，方案智能生成分系统为" + submission_single.force_arrange + "分配了任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
 
         return str_single
+    
+    def describe_last_submission2(self,index = -1):
+        # 这个是生成一个结构化数据准备拿去往前端发
+        # 先取出一个子任务出来看看成色
+        submission_single = self.submission_list[index]
+
+        # 然后生成一个dict，里面应该包含如下字段：序号，任务，平台，出发地点，出发时间，挂载，目标。
+        dict_single = {}
+        dict_single["序号"] = index
+        dict_single["平台"] = submission_single.force_arrange 
+        dict_single["出发地点"] = "红方机动阵位"
+        dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+        
+        # 然后任务这里定制一些说法
+        if submission_single.time_arrange[0] < 1001:
+            # 这里面的都写成侦查阶段
+            if submission_single.force_arrange == "无人机和巡飞弹":
+                dict_single["任务"] = "空中侦察"
+                dict_single["挂载"] = "空地导弹、机载雷达、机载光电、巡飞弹战斗部"
+                dict_single["目标"] = "探明敌方部署情况和机动方向，寻找敌方布防的薄弱环节。监视敌方空中侦查单位前出情况。"
+            elif submission_single.force_arrange == "坦克和自行迫榴炮":
+                dict_single["任务"] = "地面机动"
+                dict_single["挂载"] = "热成像、坦克主炮（穿甲弹、高爆弹）、自行迫榴炮主炮（穿甲弹、高爆弹）、机枪"
+                dict_single["目标"] = "向前推进，接近敌方阵地，占据有利位置准备发扬火力，接战敌方机动力量。"
+            elif submission_single.force_arrange == "装甲车等其他地面力量":
+                dict_single["任务"] = "地面机动"
+                dict_single["挂载"] = "热成像、机炮、反坦克导弹、车载步兵、步兵轻武器"
+                dict_single["目标"] = "掩护坦克和自行迫榴炮，提供火力支援和信息支援，迟滞敌方地面兵力机动。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方出发阵地"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+        elif submission_single.time_arrange[0] < 3001:
+            # 这里面的都写成进攻阶段
+            if submission_single.force_arrange == "无人机和巡飞弹":
+                dict_single["任务"] = "空中监视"
+                dict_single["挂载"] = "空地导弹、机载雷达、机载光电、巡飞弹战斗部"
+                dict_single["目标"] = "进攻阶段，监视敌方机动兵力动向，提供战场态势信息。为地面炮火提供目标指示。择机打击地面高价值目标。"
+            elif submission_single.force_arrange == "坦克和自行迫榴炮":
+                dict_single["任务"] = "地面进攻"
+                dict_single["挂载"] = "热成像、坦克主炮（穿甲弹、高爆弹）、自行迫榴炮主炮（穿甲弹、高爆弹）、机枪"
+                dict_single["目标"] = "进攻阶段，占据有利地形，充分发扬火力，消灭敌方有生力量，摧毁敌方防线支撑点，尝试突破防线。"
+            elif submission_single.force_arrange == "装甲车等其他地面力量":
+                dict_single["任务"] = "地面掩护"
+                dict_single["挂载"] = "热成像、机炮、反坦克导弹，电磁干扰机，车载步兵、步兵轻武器，远程火力"
+                dict_single["目标"] = "进攻阶段，适当前出掩护，消耗牵制敌方机动兵力，为坦克和自行迫榴炮提供良好的输出环境。提供电子干扰，压制敌通信和巡飞弹控制。适时提供远程火力打击，摧毁敌高价值目标或坚固据点。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方机动阵位"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+        else:
+            # 这里面都写成收尾阶段。
+            if submission_single.force_arrange == "无人机和巡飞弹":
+                dict_single["任务"] = "空中巡猎"
+                dict_single["挂载"] = "空地导弹、机载雷达、机载光电、巡飞弹战斗部"
+                dict_single["目标"] = "收尾阶段，以夺控点附近为主，搜索敌方剩余兵力，消灭敌方剩余有生力量，支撑我地面部队进一步进攻"
+            elif submission_single.force_arrange == "坦克和自行迫榴炮":
+                dict_single["任务"] = "地面进攻"
+                dict_single["挂载"] = "热成像、坦克主炮（穿甲弹、高爆弹）、自行迫榴炮主炮（穿甲弹、高爆弹）、机枪"
+                dict_single["目标"] = "收尾阶段，以优势兵力追歼残敌，进一步杀伤敌方有生力量，扩大战果。寻歼敌高价值防空目标，进占夺控点。"
+            elif submission_single.force_arrange == "装甲车等其他地面力量":
+                dict_single["任务"] = "地面引导"
+                dict_single["挂载"] = "热成像、机炮、反坦克导弹，电磁干扰机，车载步兵、步兵轻武器，远程火力"
+                dict_single["目标"] = "收尾阶段，在敌防空受到压制后，发挥装甲车辆观通和机动优势，引导我方远程火力，最大化对敌杀伤，支撑我地面部队进占夺控点。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方机动阵位"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+
+        # dict_single["任务"] = submission_single.type_str
 
     
     def get_planned_prompt(self):

@@ -194,6 +194,14 @@ class auto_run_comunicator():
         # 后面如果要有别的办法来传结构化数据，那就都是在这个函数里面拓展。
 
         pass
+    
+    def send_submission_dict(self,submission_dict):
+        # 这个是服务于弹出表格里一行行显示的。每次发送一条数据。
+        submission_dict_str = self.text_transfer.submission_dict_to_str(submission_dict)
+
+        self.send_response(submission_dict_str)
+        
+        pass
 
     def send_evaluate(self, pinggu):
         # 给GUI发个评估结果。

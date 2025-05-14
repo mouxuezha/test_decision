@@ -154,3 +154,5 @@ TODO：
 D: & cd D:\EnglishMulu\test_decision & D:\software\anaconda3\envs\shishi_MQ_with_LLM\python.exe auto_run.py 
 
 D: & cd D:/EnglishMulu/test_decision & start /B D:/software/anaconda3/envs/shishi_MQ_with_LLM/python.exe auto_run.py 
+
+后续还得定制一些个东西用来产生任务数据，服务于那个表格的显示。
