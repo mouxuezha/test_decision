@@ -77,7 +77,6 @@ class mission_arrange:
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
         
         self.save_one_plan(one_plan,"jieguo"+str(self.index))
-        self.plan_list.append(one_plan)
         return one_plan
     
     def get_void_plan(self):

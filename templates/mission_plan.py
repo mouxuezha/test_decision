@@ -111,7 +111,7 @@ class mission_plan():
         submission_single = self.submission_list[index]
 
         # 然后生成一段对话。
-        str_single = "在第" + str(submission_single.time_arrange[0]) + "帧到第" +str(submission_single.time_arrange[1]) + "帧期间，方案智能生成分系统为" + submission_single.force_arrange + "分配了任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
+        str_single = "在第" + str(submission_single.time_arrange[0]) + "秒到第" +str(submission_single.time_arrange[1]) + "秒期间，方案智能生成分系统为" + submission_single.force_arrange + "分配了任务，命令其" + submission_single.type_str+"，具体出击方向为" + submission_single.config_json["出击方向"] +"，解算得到预定任务范围"+ str(submission_single.space_arrange)+"。"
 
         return str_single
     
@@ -125,7 +125,7 @@ class mission_plan():
         dict_single["序号"] = index
         dict_single["平台"] = submission_single.force_arrange 
         dict_single["出发地点"] = "红方机动阵位"
-        dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+        dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
 
         # 然后任务这里定制一些说法
         if submission_single.time_arrange[0] < 999:
@@ -145,7 +145,7 @@ class mission_plan():
             
             dict_single["平台"] = submission_single.force_arrange 
             dict_single["出发地点"] = "红方出发阵地"
-            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
         elif submission_single.time_arrange[0] < 3001:
             # 这里面的都写成进攻阶段
             if submission_single.force_arrange == "无人机和巡飞弹":
@@ -163,7 +163,7 @@ class mission_plan():
             
             dict_single["平台"] = submission_single.force_arrange 
             dict_single["出发地点"] = "红方机动阵位"
-            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
         else:
             # 这里面都写成收尾阶段。
             if submission_single.force_arrange == "无人机和巡飞弹":
@@ -181,7 +181,7 @@ class mission_plan():
             
             dict_single["平台"] = submission_single.force_arrange 
             dict_single["出发地点"] = "红方机动阵位"
-            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "帧"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
         
         # 加两个空行看看。
         dict_single["目标"] = "\n" + dict_single["目标"] + "\n"

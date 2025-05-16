@@ -148,10 +148,9 @@ class auto_run_comunicator():
                 receive_seat = "commandor"
                 
                 # self.handle_command_expedient(receive_seat,receive_str)# 分别执行就完事了。
-                # future = self.handle_threadpool.submit(self.handle_command_expedient,receive_seat,receive_str) 
+
                 # 莲餐版本的展示。
                 future = self.handle_threadpool.submit(self.handle_command_liancan2,receive_seat,receive_str)
-
                 # 这个和threading不一样了，这个不用打括号了。
                 jieguo = future.result() # 猜测是得调用result的时候才会真的执行，所以只写上面那句不写这里这句的话它不太行
 
@@ -228,8 +227,8 @@ class auto_run_comunicator():
                 else:
                     print("handle_command_expedient： 方案生成")
                     mission_arrange_single = mission_arrange(communicator=self) 
-                    plan_list = mission_arrange_single.main_loop(plan_num = 1)
-                    # plan_list = mission_arrange_single.main_loop_debug(plan_num = 2)
+                    # plan_list = mission_arrange_single.main_loop(plan_num = 1)
+                    plan_list = mission_arrange_single.main_loop_debug(plan_num = 1)
                     self.send_plan(plan_list)
                     self.running_result["Planning"] = plan_list
             elif command_type == "历史方案":
@@ -260,6 +259,7 @@ class auto_run_comunicator():
         pass
         # 先来个教程，输出一些提示词，生成一个单个的方案，然后送到前端去。
         flag_pass, command_type = self.check_seat_expedient(seat,command) # 鉴权
+
     def handle_command_liancan2(self,seat="none",command="none"):
         # 这个是改版的莲餐演示，直接来了，跳过教程部分了
         # 先来个教程，输出一些提示词，生成一个单个的方案，然后送到前端去。
@@ -298,7 +298,7 @@ class auto_run_comunicator():
         if not "order_one_plan" in self.config_dict:
             self.config_dict["order_one_plan"] = ""
         if not("index_one_plan" in self.config_dict):
-            self.config_dict["index_one_plan"]  = 5 # 这个用来标注one plan运行到第几步了。
+            self.config_dict["index_one_plan"]  = 0 # 这个用来标注one plan运行到第几步了。
 
         if self.config_dict["index_one_plan"] < 5:
             # 那就是还在输命令.

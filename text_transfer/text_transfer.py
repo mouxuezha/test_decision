@@ -664,8 +664,8 @@ class text_transfer(object):
     def submission_single_to_str2(self,submission_single):
         
         # 行吧，这个是按照雪楠哥他们的格式重新弄的。每个子任务分别处理
-
-        submission_str = "{\"alt\":0.0,\"force_arrange\":\""+submission_single.force_arrange+"\",\"id\":\""+submission_single.id_str+"\",\"lat\":"+str(submission_single.space_arrange[0])+",\"lon\":" + str(submission_single.space_arrange[1]) + ",\"type\":\"" + submission_single.type_str+"\"}"
+        # 为了复用接口，直接用alt传time_arrange[0]了，丑陋但是有用。
+        submission_str = "{\"alt\":"+str(submission_single.time_arrange[0])+",\"force_arrange\":\""+submission_single.force_arrange+"\",\"id\":\""+submission_single.id_str+"\",\"lat\":"+str(submission_single.space_arrange[1])+",\"lon\":" + str(submission_single.space_arrange[0]) + ",\"type\":\"" + submission_single.type_str+"\"}"
         
         return submission_str
         # pass
@@ -690,7 +690,7 @@ class text_transfer(object):
         # 这个是包装一下 # 这边有颜色显示，0,：白的，123：彩色。
         response_str = self.clean_the_str(response_str)
         response_str = self.clean_the_str2(response_str)
-        if "帧期间" in response_str:
+        if "秒期间" in response_str:
             color = 2 
         wrapped_str = "{\"SchemesDataList\":[],\"msgCommid\":\""+response_str+"\", \"color\" : "+str(color)+"}"        
         return wrapped_str
