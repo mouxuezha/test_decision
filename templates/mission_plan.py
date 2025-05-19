@@ -176,7 +176,7 @@ class mission_plan():
                 dict_single["目标"] = "收尾阶段，以优势兵力追歼残敌，进一步杀伤敌方有生力量，扩大战果。寻歼敌高价值防空目标，进占夺控点。"
             elif submission_single.force_arrange == "装甲车等其他地面力量":
                 dict_single["任务"] = "地面引导"
-                dict_single["挂载"] = "热成像、机炮、反坦克导弹，电磁干扰机，车载步兵、步兵轻武器，远程火力"
+                dict_single["挂载"] = "热成像、机炮、反坦克导弹，电磁干扰机，步兵轻武器，远程火力"
                 dict_single["目标"] = "收尾阶段，在敌防空受到压制后，发挥装甲车辆观通和机动优势，引导我方远程火力，最大化对敌杀伤，支撑我地面部队进占夺控点。"
             
             dict_single["平台"] = submission_single.force_arrange 
