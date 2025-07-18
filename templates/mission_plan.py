@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from DeLLMa.DeLLMa import *
 
 from templates.submision import *
+from examples.text_loader import text_loader
+import inspect
 
 class mission_plan():
     def __init__(self):
@@ -13,6 +15,7 @@ class mission_plan():
         self.force_arrange = [] 
         self.submission_list = []
         self.DeLLMa = DeLLMa()
+        self.text_loader = text_loader()
     
     def set_users_goal(self, G:str):
         # 这个是用来对某个任务设定目标的。明确:论文里的users goal G和这里代码里的target str，道理上就是一回事儿。
@@ -125,13 +128,18 @@ class mission_plan():
         
         # 然后来一段根据时间的情况来推测敌方动向的Prompt，以及我方战术提示的。这部分对标的其实是条令条例。
         time =self.check_time()
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+
         planned_prompt += "根据当前时间"+str(time)+"帧，推测敌方动向如下: \n"
         if time < 1002:
-            planned_prompt += "敌方从起始点出发，尚在向可能的预定阵地进行机动，我方需做出侦察，以根据情况选择合适作战方向。"
+            planned_prompt += self.text_loader.get_certain_text(method_name,"planned_prompt1")  
+            # planned_prompt += "敌方从起始点出发，尚在向可能的预定阵地进行机动，我方需做出侦察，以根据情况选择合适作战方向。"
         elif time < 3002:
-            planned_prompt += "敌方已经到达预定阵地，正在等待我方进攻，我方需做好进攻准备，进行火力试探。"
+            planned_prompt += self.text_loader.get_certain_text(method_name,"planned_prompt2")  
+            # planned_prompt += "敌方已经到达预定阵地，正在等待我方进攻，我方需做好进攻准备，进行火力试探。"
         else:
-            planned_prompt += "敌方可能已经发现我方行动意图，并相应调整了布署，此时我方应该集结兵力，互相配合，尝试取得突破。"
+            planned_prompt += self.text_loader.get_certain_text(method_name,"planned_prompt3")  
+            # planned_prompt += "敌方可能已经发现我方行动意图，并相应调整了布署，此时我方应该集结兵力，互相配合，尝试取得突破。"
 
             
         return planned_prompt, planned_unit_type
@@ -165,16 +173,21 @@ class mission_plan():
             planned_unit_type = unit_type
         else:
             planned_unit_type = []
+            method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+
             for unit_type_single in unit_type:
                 if unit_type_single not in force_arranged_list:
                     if unit_type_single == "坦克和自行迫榴炮":
-                        force_prompt += "尚未为坦克和自行迫榴炮榴炮安排作战任务，应该充分发挥其火力优势，安排其掩护我方地面力量，打击敌方防线。\n"
+                        # force_prompt += "尚未为坦克和自行迫榴炮榴炮安排作战任务，应该充分发挥其火力优势，安排其掩护我方地面力量，打击敌方防线。\n"
+                        force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt1")  
                         planned_unit_type.append(unit_type_single)
                     elif unit_type_single == "无人机和巡飞弹":
-                        force_prompt += "尚未为无人机和巡飞弹安排作战任务，应该充分发挥其机动和侦察优势，根据态势预测安排其前出侦察。\n"
+                        force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt2")  
+                        # force_prompt += "尚未为无人机和巡飞弹安排作战任务，应该充分发挥其机动和侦察优势，根据态势预测安排其前出侦察。\n"
                         planned_unit_type.append(unit_type_single)
                     elif unit_type_single == "装甲车等其他地面力量":
-                        force_prompt += "尚未为装甲车等其他地面力量安排作战任务，应该发挥其电子干扰、运输步兵的优势，为其他单位提供有效支援。\n"
+                        force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt3")  
+                        # force_prompt += "尚未为装甲车等其他地面力量安排作战任务，应该发挥其电子干扰、运输步兵的优势，为其他单位提供有效支援。\n"
                         planned_unit_type.append(unit_type_single) # 复制代码很是丑陋，但是不管了，无所谓了呵呵。
         waiting_prompt = force_prompt + "你作为决策者，接下来需要在考虑敌方可能应对的同时做出决策。"
         

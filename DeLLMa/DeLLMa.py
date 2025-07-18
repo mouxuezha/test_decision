@@ -12,6 +12,10 @@ from text_transfer.text_transfer import *
 from templates.submision import *
 from model_communication.model_comm_langchain import ModelCommLangchain
 from output_tools.output_docx import output_docx
+
+from examples.text_loader import text_loader
+import inspect
+
 class DeLLMa():
     # 算了，和大模型互动的也闭环在这里面好了。
 
@@ -24,9 +28,13 @@ class DeLLMa():
         self.unit_type = unit_type 
         
         self.set_config_assist()
+
+        self.text_loader = text_loader()
         
         self.output_docx = output_docx()
-        self.output_docx.set_heading("多军兵种联合陆地攻防作战场景下任务分配案例")
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        name = self.text_loader.get_certain_text(method_name,"name")   
+        self.output_docx.set_heading(name)
         
     
     def set_config_assist(self,**kargs):
@@ -197,17 +205,22 @@ class DeLLMa():
         if self.config_assist["num_round"] == 0:
             # 那就把这堆东西存到docx里面去
             self.output_docx.set_context(context)
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
 
-        context += "这个过程中你需要做的第一步，是生成一个信度分布，描述敌我双方战场态势的可能状态。"
+        context += self.text_loader.get_certain_text(method_name,"context")   
+        # context += "这个过程中你需要做的第一步，是生成一个信度分布，描述敌我双方战场态势的可能状态。"
 
         state_discription = self.text_transfer.state_discription_dict
         state_str = self.text_transfer.prepare_state_prompt(state_discription)
         belief_list_str = self.text_transfer.prepare_belief_prompt()
 
         state_enumeration_prompt = context + state_str
-        state_enumeration_prompt += "\n 每个键都应该映射到一个有3个键的JSON对象，每个键都是一个描述状态变量的字符串，不要包含注释。这些键应该包含状态变量最可能的三个取值，每个键应该映射到你对它的信度，以自然语言表示。如果这些变量是连续变量，你应该将它们离散成三种值。"
+        state_enumeration_prompt += self.text_loader.get_certain_text(method_name,"state_enumeration_prompt1")  
+        state_enumeration_prompt += "你仅应该从以下列表中挑选信度的描述，" + belief_list_str + self.text_loader.get_certain_text(method_name,"state_enumeration_prompt2")  
+        
+        # state_enumeration_prompt += "\n 每个键都应该映射到一个有3个键的JSON对象，每个键都是一个描述状态变量的字符串，不要包含注释。这些键应该包含状态变量最可能的三个取值，每个键应该映射到你对它的信度，以自然语言表示。如果这些变量是连续变量，你应该将它们离散成三种值。"
 
-        state_enumeration_prompt += "你仅应该从以下列表中挑选信度的描述，" + belief_list_str + "例如，若其中一个状态变量是“敌方经度”，然后三个最可能的取值是“靠中间”、“偏西”、“偏东”，那么你的回复应该是如下格式：\n        {\n            \"敌方经度\" : {\n                \"靠中间\" : \"很可能\",\n                \"偏西\" : \"有点可能\",\n                \"偏东\" : \"不太可能\"\n            },\n        }"
+        # state_enumeration_prompt += "你仅应该从以下列表中挑选信度的描述，" + belief_list_str + "例如，若其中一个状态变量是“敌方经度”，然后三个最可能的取值是“靠中间”、“偏西”、“偏东”，那么你的回复应该是如下格式：\n        {\n            \"敌方经度\" : {\n                \"靠中间\" : \"很可能\",\n                \"偏西\" : \"有点可能\",\n                \"偏东\" : \"不太可能\"\n            },\n        }"
 
         # 好，然后和大模型交互一圈，看看情况。这里其实应该已经算是forecasting了，
         # print(state_enumeration_prompt)

@@ -176,14 +176,15 @@ class mission_arrange:
         submission_list_new = [] 
         for submission_single in plan.submission_list:
             submission_list_new.append(submission_single)
-            if(submission_single.force_arrange == "装甲车等其他地面力量"):
-                # 那就是追加分配电磁干扰任务
-                submission_single_new = self.submission_single_to_ECM(submission_single,index=len(submission_list_new))
-                submission_list_new.append(submission_single_new)
+            # if(submission_single.force_arrange == "装甲车等其他地面力量"):
+            #     # 那就是追加分配电磁干扰任务
+            #     submission_single_new = self.submission_single_to_ECM(submission_single,index=len(submission_list_new))
+            #     submission_list_new.append(submission_single_new)
         plan_new.submission_list = submission_list_new
         return plan_new
 
     def submission_single_to_ECM(self,submission_single,index=0):
+        return
         # 修改生成电子战方案。原则上不应该放这里的，不过不管了下次一定。
         submission_single_new = copy.deepcopy(submission_single)
         model_selected, submodel_selected = self.text_transfer.generate_ECM_model()

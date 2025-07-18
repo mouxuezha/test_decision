@@ -37,6 +37,8 @@ def test_text_transfer2():
     commands = shishi.text_to_commands(text_demo)
     assert len(commands)>0
 
+
+
 if __name__ == "__main__":
 
     pytest.main(["-v", "-s", "testing/test_text_transfer.py"])

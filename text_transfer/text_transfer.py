@@ -657,6 +657,7 @@ class text_transfer(object):
     
     def submission_single_to_ECM(self,submission_single,index=0):
         # 修改生成电子战方案。原则上不应该放这里的，不过不管了下次一定。
+        return
         submission_single_new = copy.deepcopy(submission_single)
         model_selected, submodel_selected = self.generate_ECM_model()
 
