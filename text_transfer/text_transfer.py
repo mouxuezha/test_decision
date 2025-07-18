@@ -9,14 +9,15 @@ import json
 from typing import Optional, Dict, List, Tuple, Callable
 import random,copy 
 from templates.gis import gis
+from examples.text_loader import text_loader
+import inspect
 
 class text_transfer(object):
     def __init__(self) -> None:
         self.command_type_list = ["move", "stop", "off_board"]
         self.type_transfer = type_transfer()
         self.num_commands = [0,0] # 第一个是转化成功的commands，第二个是转化失败的commands 
-        self.ed_lat,  self.ed_lon =  39.70, 2.68984
-        self.tar_lat, self.tar_lon = 39.7600, 2.7100
+        self.text_loader = text_loader()
 
         self.__init_type()
 
@@ -28,23 +29,32 @@ class text_transfer(object):
     def __init_type(self):
         # 这个就是把那些ID的类型弄过来整成一个列表以备后用。
         # 红方坦克：MainBattleTank_ZTZ100，蓝方坦克：MainBattleTank_ZTZ200，红方步兵战车：WheeledCmobatTruck_ZB100，蓝方步兵战车：WheeledCmobatTruck_ZB200，步兵班：Infantry，自行迫榴炮：Howitzer_C100，无人突击车：ArmoredTruck_ZTL100，无人机：ShipboardCombat_plane，导弹发射车：missile_truck。
-        self.type_list = ["MainBattleTank_ZTZ100","MainBattleTank_ZTZ200","WheeledCmobatTruck_ZB100","WheeledCmobatTruck_ZB200","Infantry","Howitzer_C100","ArmoredTruck_ZTL100","ShipboardCombat_plane","missile_truck","JammingTruck","RedCruiseMissile","BlueCruiseMissile"]
-        self.type_list_CN = ["坦克","坦克","步兵战车","步兵战车","步兵班","自行迫榴炮","无人突击车","无人机","导弹发射车","电子干扰车","巡飞弹","巡飞弹"]
-        self.command_type_list = ["move","stop","offboard"] # 
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        self.type_list = self.text_loader.get_certain_text(method_name,"type_list")
+        self.type_list_CN = self.text_loader.get_certain_text(method_name,"type_list_CN")
+        self.command_type_list = self.text_loader.get_certain_text(method_name,"command_type_list")
+    
+        # self.type_list = ["MainBattleTank_ZTZ100","MainBattleTank_ZTZ200","WheeledCmobatTruck_ZB100","WheeledCmobatTruck_ZB200","Infantry","Howitzer_C100","ArmoredTruck_ZTL100","ShipboardCombat_plane","missile_truck","JammingTruck","RedCruiseMissile","BlueCruiseMissile"]
+        # self.type_list_CN = ["坦克","坦克","步兵战车","步兵战车","步兵班","自行迫榴炮","无人突击车","无人机","导弹发射车","电子干扰车","巡飞弹","巡飞弹"]
+        # self.command_type_list = ["move","stop","offboard"] # 
     
     def __init_DeLLMa(self):
-        self.state_enmueration_dict = {"敌方经度":["偏西","靠中间","偏东"],
-                                  "敌方纬度":["偏北","靠中间","偏南"],
-                                  "敌方聚集程度":["分散","一般","集中"],
-                                  "我方经度":["偏西","靠中间","偏东"],
-                                  "我方纬度":["偏北","靠中间","偏南"],
-                                  "我方聚集程度":["分散","一般","集中"]}
-        self.state_discription_dict = {"敌方经度":"敌方所有装备所处位置经度的平均值",
-                                  "敌方纬度":"敌方所有装备所处位置经度的平均值",
-                                  "敌方聚集程度":"敌方各装备相互之间的距离大小、分散程度",
-                                  "我方经度":"我方所有装备所处位置经度的平均值",
-                                  "我方纬度":"我方所有装备所处位置经度的平均值",
-                                  "我方聚集程度":"我方各装备相互之间的距离大小、分散程度"}
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        self.state_enmueration_dict = self.text_loader.get_certain_text(method_name, "state_enmueration_dict")
+        self.state_discription_dict = self.text_loader.get_certain_text(method_name, "state_discription_dict")
+
+        # self.state_enmueration_dict = {"敌方经度":["偏西","靠中间","偏东"],
+        #                           "敌方纬度":["偏北","靠中间","偏南"],
+        #                           "敌方聚集程度":["分散","一般","集中"],
+        #                           "我方经度":["偏西","靠中间","偏东"],
+        #                           "我方纬度":["偏北","靠中间","偏南"],
+        #                           "我方聚集程度":["分散","一般","集中"]}
+        # self.state_discription_dict = {"敌方经度":"敌方所有装备所处位置经度的平均值",
+        #                           "敌方纬度":"敌方所有装备所处位置经度的平均值",
+        #                           "敌方聚集程度":"敌方各装备相互之间的距离大小、分散程度",
+        #                           "我方经度":"我方所有装备所处位置经度的平均值",
+        #                           "我方纬度":"我方所有装备所处位置经度的平均值",
+        #                           "我方聚集程度":"我方各装备相互之间的距离大小、分散程度"}
         self.planned_str = ""
 
     def LLA2XYZ(self, lon, lat, alt):
@@ -305,17 +315,24 @@ class text_transfer(object):
     
     def get_initial_prompt(self):
         print("get_initial_prompt unfinished yet,return a demo")
-        initial_prompt = '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。'
-        '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战，'
-        '我方需要攻取位于经纬度坐标(100.1247, 13.6615)的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。'
-        '每隔一定步数，我将告诉你敌我态势和其他信息，并由你来尝试生成作战指令。\n'
-        # 还需要一些描述地图的prompt
-        initial_prompt = initial_prompt + "地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标(100.137,13.644),(100.116,13.643),(100.164,13.658)有可供步兵占领和建立防线的建筑物。"
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        initial_prompt = self.text_loader.get_certain_text(method_name,"initial_prompt")   
+        initial_prompt2 = self.text_loader.get_certain_text(method_name,"initial_prompt2")   
+
+        # initial_prompt = '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。'
+        # '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战，'
+        # '我方需要攻取位于经纬度坐标(100.1247, 13.6615)的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，导弹发射车不能机动。'
+        # '每隔一定步数，我将告诉你敌我态势和其他信息，并由你来尝试生成作战指令。\n'
+        # # 还需要一些描述地图的prompt
+        # initial_prompt = initial_prompt + "地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标(100.137,13.644),(100.116,13.643),(100.164,13.658)有可供步兵占领和建立防线的建筑物。"
+        initial_prompt = initial_prompt + initial_prompt2
         return initial_prompt
 
     def get_order_guize(self):
         # 这里面是给大模型设定的规则的格式。
-        order_guize = '请按照以下格式给出作战指令。进攻指令：[move, obj_id , x=int, y=int], 如坦克mbt_1进攻坐标(100.1247, 13.6615)，则指令为[move, obj_id=mbt_1, x=100.1247, y=13.6615] \n停止指令：[stop, obj_id], 如坦克mbt_1停止当前行动，则指令为[stop, obj_id=mbt_1] \n步兵下车指令: [off_board, obj_id],如步战车ifv_1内步兵立刻下车,则指令为[off_board, obj_id=ifv_1]'
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        order_guize = self.text_loader.get_certain_text(method_name,"order_guize")   
+        # order_guize = '请按照以下格式给出作战指令。进攻指令：[move, obj_id , x=int, y=int], 如坦克mbt_1进攻坐标(100.1247, 13.6615)，则指令为[move, obj_id=mbt_1, x=100.1247, y=13.6615] \n停止指令：[stop, obj_id], 如坦克mbt_1停止当前行动，则指令为[stop, obj_id=mbt_1] \n步兵下车指令: [off_board, obj_id],如步战车ifv_1内步兵立刻下车,则指令为[off_board, obj_id=ifv_1]'
         return order_guize
 
     def find_all_str(self, text:str, sub_str:str):
@@ -455,17 +472,26 @@ class text_transfer(object):
             gis_str = "地图范围为经度100.0923到100.18707，纬度范围为13.6024到13.6724，地图大部分为陆地，具有河流、桥梁和路网，在经纬度坐标[100.116,13.643]，[100.137,13.644]，[100.164,13.658]有东、中、西三个可供步兵占领和防御的建筑物。它们之间有公路和桥梁相连，在中间那座建筑物附近跨越一条南北向河流。在此条公路以北地区，不再有东西方向桥梁供通行，但可以在适当位置隔河打击敌方目标。" # 这个是原版的，随便写了几句，放这里是为了保持兼容性。
 
         # 这个好说，就是场景和态势嘛，可以从text_JSQL里面抄。
-        jieguo = '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。' + \
-            '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战。我方自行迫榴炮具备较大的射程和载弹量，但只能在停下后攻击，坦克、无人突击车、无人机等则可以在移动中展开攻击' + gis_str + \
-            '我方需要攻取位于经纬度坐标[100.1247, 13.6615]的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，导弹发射车不能机动，固定部署在远处以提供火力支援。推演以帧为单位推进，每一帧对应推演中的1秒，共进行5000帧，推演中装备的移动速度均与现实中类似，可据此估计双方位置'
-        # jieguo += '请按照以下格式给出作战指令。进攻指令： [move, obj_id , x=int, y=int] , \n 如坦克MainBattleTank_ZTZ100_0和无人突击车ArmoredTruck_ZTL100_0进攻坐标(100.1247, 13.6615)，则指令为两条 [move, obj_id=MainBattleTank_ZTZ100_0, x=100.1247, y=13.6615],[move, obj_id=ArmoredTruck_ZTL100_0, x=100.1247, y=13.6615]  \n停止指令： [stop, obj_id],\n  如步兵Infantry0停止当前行动，则指令为[stop, obj_id=Infantry0] \n 步兵下车指令: [off_board, obj_id] , \n 如步战车WheeledCmobatTruck_ZB100_1内步兵立刻下车,则指令为 [off_board, obj_id=WheeledCmobatTruck_ZB100_1] '  
-        jieguo += "敌方为蓝方，初始部署位置为[100.1247, 13.6615]，拥有坦克、步兵战车、步兵、无人突击车、巡飞弹、无人机、防空导弹发射车等装备，在东、中、西建筑物内有驻守有蓝方步兵，防空导弹发射车固定部署在夺控点周围一定范围内，在未受打击时能够完全拦截我方导弹。推演开始后，蓝方地面单位将进行机动，靠近建筑物和交通线布防，并派遣巡飞弹、无人机等前出侦察。根据我方行动，敌方有可能沿交通线调动兵力，阻击我方单位前进。以推演结束时对夺控点的占领情况和战损比情况来确定胜负，我方地面单位机动到夺控点并保持40帧即可占领夺控点，战损比以双方分数计算，导弹发射车50分，坦克20分，装甲车辆和无人机15分，步兵和巡飞弹5分。因此，我方应该充分侦察，发挥地面火力优势，优先消灭对方防空导弹发射车后有效利用我方导弹打击敌地面目标。"  
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        jieguo1 = self.text_loader.get_certain_text(method_name,"jieguo1")  
+        jieguo2 = self.text_loader.get_certain_text(method_name,"jieguo2")
+        jieguo3 = self.text_loader.get_certain_text(method_name,"jieguo3") 
+        jieguo4 = self.text_loader.get_certain_text(method_name,"jieguo4") 
+        jieguo = jieguo1 + gis_str + jieguo2 + jieguo3
+
+        # jieguo = '请作为兵棋推演游戏的玩家，设想一个陆战攻防场景。' + \
+        #     '我方为红方，拥有坦克、步兵战车、步兵、自行迫榴炮、无人突击车、巡飞弹、无人机、导弹发射车、电子干扰车等装备，步兵下车后作战。我方自行迫榴炮具备较大的射程和载弹量，但只能在停下后攻击，坦克、无人突击车、无人机等则可以在移动中展开攻击' + gis_str + \
+        #     '我方需要攻取位于经纬度坐标[100.1247, 13.6615]的夺控点，将陆战装备移动到夺控点处并消灭夺控点附近敌人可占领夺控点，导弹发射车不能机动，固定部署在远处以提供火力支援。推演以帧为单位推进，每一帧对应推演中的1秒，共进行5000帧，推演中装备的移动速度均与现实中类似，可据此估计双方位置'
+        # jieguo += "敌方为蓝方，初始部署位置为[100.1247, 13.6615]，拥有坦克、步兵战车、步兵、无人突击车、巡飞弹、无人机、防空导弹发射车等装备，在东、中、西建筑物内有驻守有蓝方步兵，防空导弹发射车固定部署在夺控点周围一定范围内，在未受打击时能够完全拦截我方导弹。推演开始后，蓝方地面单位将进行机动，靠近建筑物和交通线布防，并派遣巡飞弹、无人机等前出侦察。根据我方行动，敌方有可能沿交通线调动兵力，阻击我方单位前进。以推演结束时对夺控点的占领情况和战损比情况来确定胜负，我方地面单位机动到夺控点并保持40帧即可占领夺控点，战损比以双方分数计算，导弹发射车50分，坦克20分，装甲车辆和无人机15分，步兵和巡飞弹5分。因此，我方应该充分侦察，发挥地面火力优势，优先消灭对方防空导弹发射车后有效利用我方导弹打击敌地面目标。"  
+        
         if len(self.planned_str)>0:
             # 那就是之前已经有了，把之前的传进来。
             jieguo += self.planned_str
         else:
             # 没有就先给个默认的。
-            jieguo += "现在我们需要在敌情不确定的情况下做出决策，你作为决策者，目标是在考虑了不确定的敌情的基础上给出最优的的动作。"
+            # jieguo += "现在我们需要在敌情不确定的情况下做出决策，你作为决策者，目标是在考虑了不确定的敌情的基础上给出最优的的动作。"
+            jieguo += jieguo4
+
 
         return jieguo
     
@@ -527,18 +553,27 @@ class text_transfer(object):
     
     def prepare_utility_prompt(self,human_intent = "none"):
         # 后面要多方案或者要人工介入的话，就在这里面改。增加效用。
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        
         if human_intent == "none":
-            human_intent = "制定一个绕开敌方主要设防区域的进攻方案，控制我方损失，并尽量优先打击敌方防空力量。"
-        utility_prompt = "我们是红方指挥官，需要为红方制定进攻方案，方案分步骤分阶段进行，现需要确定当前当前态势下，下一阶段采取的动作。希望达到的效果是" + human_intent + "。"
+            human_intent = self.text_loader.get_certain_text(method_name,"human_intent")  
+            # human_intent = "制定一个绕开敌方主要设防区域的进攻方案，控制我方损失，并尽量优先打击敌方防空力量。"
+        utility_prompt = self.text_loader.get_certain_text(method_name,"utility_prompt")  
+        utility_prompt = utility_prompt + human_intent + "。"
+        # utility_prompt = "我们是红方指挥官，需要为红方制定进攻方案，方案分步骤分阶段进行，现需要确定当前当前态势下，下一阶段采取的动作。希望达到的效果是" + human_intent + "。"
         
         return utility_prompt 
 
     def prepare_preference_prompt(self,state_action_batch:list):
-        preference_prompt = "前面我已给出一系列状态动作对组合，其中状态从你给出的状态分布预测中取出，动作则从动作空间中均匀选出。现在我希望通过你对状态-动作对的比较，来建立一个效用函数。"
-        format_instruction = "你应当以JSON格式给出回应，其中包含以下字段：\n" + \
-        "decision: 一个字符串，用于表示你推荐的状态-动作对。输出格式应该和前面列出的状态动作对一致，例如：状态-动作对5\n" + \
-        "rank: 一个由整数组成的列表，表示你对状态-动作对的偏好顺序。列表中的每个整数对应一个状态-动作对，以偏好程度降序排列，整数越小表示越偏好。例如，[1, 3, 2] 表示你偏好状态-动作对1，其次状态-动作对3，最后状态-动作对2。 \n" + \
-        "explanatioin: 一个字符串，用于详细解释你做出决定的原因，对每个行动方案，应该包含期望的行动方向、所需单位等，以及影响它们的因素"
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        preference_prompt = self.text_loader.get_certain_text(method_name,"preference_prompt")  
+        format_instruction = self.text_loader.get_certain_text(method_name,"format_instruction")  
+
+        # preference_prompt = "前面我已给出一系列状态动作对组合，其中状态从你给出的状态分布预测中取出，动作则从动作空间中均匀选出。现在我希望通过你对状态-动作对的比较，来建立一个效用函数。"
+        # format_instruction = "你应当以JSON格式给出回应，其中包含以下字段：\n" + \
+        # "decision: 一个字符串，用于表示你推荐的状态-动作对。输出格式应该和前面列出的状态动作对一致，例如：状态-动作对5\n" + \
+        # "rank: 一个由整数组成的列表，表示你对状态-动作对的偏好顺序。列表中的每个整数对应一个状态-动作对，以偏好程度降序排列，整数越小表示越偏好。例如，[1, 3, 2] 表示你偏好状态-动作对1，其次状态-动作对3，最后状态-动作对2。 \n" + \
+        # "explanatioin: 一个字符串，用于详细解释你做出决定的原因，对每个行动方案，应该包含期望的行动方向、所需单位等，以及影响它们的因素"
         
         # 这段是别人那里抄来的，感觉貌似没啥用呀，先放着吧，屎山就屎山一点了先能用再说别的。
         # preference_prompts = [] 
@@ -663,7 +698,7 @@ class text_transfer(object):
         return wrapped_str
 
     def generate_ECM_model(self):
-        # 生成电子干扰的说法。
+        # 生成电子干扰的说法。 # 这个本质上用于骗人，因此暂时不做处理。
         model_dict ={}
         model_dict["电子攻击"] = ["噪声干扰，通过发射高功率噪声信号，阻塞敌方通信频段，使其无法有效通联。在发现敌巡飞弹后将波束集中于其上，全力确保我地面单位不受其影响","欺骗干扰，通过发射虚假信号，误导敌方探测，使其产生错误的目标信息。", "反辐射攻击，确定敌方主要辐射源位置后同步至我方自行迫榴炮和远程火力，选配相应弹种对其进行反辐射打击。"]
         model_dict["电子防护"] = ["频率捷变，快速改变通信工作频率，避开敌方干扰，优先保障我方各个作战单元之间的态势及时共享和命令及时传达。","功率管理，动态调整发射功率，降低我方电子干扰车被侦测和干扰的概率。","多路径传输，通过多条路径传输信号，提高抗干扰和抗截获能力，保障在受扰条件下我前线各地面作战单元之间仍能及时共享态势"] 
@@ -683,7 +718,10 @@ class text_transfer(object):
     def state_forcaste_to_str(self, state_forcaste:dict):
         # 这个是把state_forcaste转成字符串，面向输出，所以需要搞一些
         # return json.dumps(state_forcaste,ensure_ascii=False)
-        state_forcaste_str = "  经过综合考虑当前推演场景、我方已决策的子任务序列、敌方的既往可能活动，方案智能生成分系统对后续局势做出如下推测：\n"
+        # state_forcaste_str = "  经过综合考虑当前推演场景、我方已决策的子任务序列、敌方的既往可能活动，方案智能生成分系统对后续局势做出如下推测：\n"
+
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        state_forcaste_str = self.text_loader.get_certain_text(method_name,"state_forcaste_str")         
         for key_str in list(state_forcaste.keys()):
             state_forcaste_str += key_str
             state_forcaste_str += "："

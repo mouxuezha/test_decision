@@ -13,3 +13,5 @@ langchain-openai
 websocket-client
 
 python-docx
+uv
+pytest

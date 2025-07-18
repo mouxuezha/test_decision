@@ -207,6 +207,11 @@ if __name__ == "__main__":
         shishi = mission_arrange()
         # 加载进来看看成色。
         shishi.main_loop_debug(plan_num=3)
+    elif flag == 2:
+        # 换场景了，重开一个以示友好。这个分支里面该删就删。
+        plan_num = 3
+        shishi = mission_arrange()
+        shishi.main_loop(plan_num = plan_num)        
     # shishi = mission_arrange()
     # # input_prompt = StagePrompt()
     # # index = 1
