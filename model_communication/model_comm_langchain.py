@@ -21,6 +21,8 @@ print(root_path)
 sys.path.append(root_path)
 from text_transfer.prompts import PROMPT_TEMPLATES
 
+from ollama import chat
+from ollama import ChatResponse
 
 CHAT_MODELS = {
     'zhipu': ChatZhipuAI,
@@ -90,7 +92,7 @@ MODEL_KWARGS = {
     },  
     "local": {
         'model': "deepseek-r1:14b",
-        'base_url': "http://localhost:11434/v1",
+        'base_url': 'http://192.168.1.213:11439/v1/',
         'api_key': 'ollama'
     }  
 }
@@ -166,6 +168,15 @@ class ModelCommLangchain():
         self.save_txt(message)    
         if MODEL_KWARGS[self.model_name].get("stream", False):
             resp_str = self.communicate_with_model_stream(message)
+        elif self.model_name == 'local':
+            # 紧急状态
+            response: ChatResponse = chat(model='deepseek-r1:14b', messages=[
+            {
+                'role': 'user',
+                'content': message,
+            },
+            ])
+            resp_str = response['message']['content']
         else:
             resp = self.chain.invoke(str(HumanMessage(content=message)), config={"callbacks": self.cb})     
  
@@ -339,4 +350,16 @@ if __name__ == '__main__':
                     # 打印回复过程
                     print(delta.content, end='', flush=True)
                     answer_content += delta.content
+    elif flag == 3:
+        from ollama import chat
+        from ollama import ChatResponse
 
+        response: ChatResponse = chat(model='deepseek-r1:14b', messages=[
+        {
+            'role': 'user',
+            'content': 'Why is the sky blue?',
+        },
+        ])
+        print(response['message']['content'])
+        # or access fields directly from the response object
+        print(response.message.content)

@@ -163,3 +163,5 @@ D: & cd D:/EnglishMulu/test_decision & start /B D:/software/anaconda3/envs/shish
 ==================================================================================
 
 继续，加一层映射，把那个move那个处理掉。
+
+netsh winhttp reset proxy

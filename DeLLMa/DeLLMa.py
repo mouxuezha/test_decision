@@ -34,6 +34,8 @@ class DeLLMa():
         # 这个就是封装太多层了造成的蛋疼，要把大模型的东西传出去还少不得一番折腾。
         # 也好，这波改完之后方便调试了。
         self.communicator = communicator
+        if self.communicator =="none":
+            self.communicator=None
 
     def set_config_assist(self,**kargs):
         self.config_assist = {} # 这个用来实现一些边缘的功能,原则上删了不影响算法的成立的。

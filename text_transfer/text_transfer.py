@@ -737,8 +737,8 @@ class text_transfer(object):
 
     def str_squeeze(self,str_input,len_max=300):
         # 这个就是如果字符串太多了就把中间部分略去，搞成显示出来不那么抽象的效果。
-        flag = False
-        if flag:
+        flag = 1
+        if flag==0:
             # 这个是选择开不开压缩功能了。直接在这里关比到处找引用来得快。
         
             len_qian = int(len_max*2/3) 
@@ -751,6 +751,19 @@ class text_transfer(object):
             if zishu > len_max:
                 # 那就启动压缩。
                 
+                str_qian = str_input[0:len_qian]
+                str_hou = str_input[zishu-len_hou:-1]
+                str_zhongjian = "……【过长显示已折叠】……"
+                str_output = str_qian + str_zhongjian + str_hou
+            else:
+                str_output = str_input
+        elif flag ==1:
+            # 如果超过了就直接覆盖掉。
+            zishu = len(str_input)
+            len_qian=150
+            len_hou=150
+            if zishu > 9990:
+                # 那就是超过太多了，那就直接覆盖了。
                 str_qian = str_input[0:len_qian]
                 str_hou = str_input[zishu-len_hou:-1]
                 str_zhongjian = "……【过长显示已折叠】……"
