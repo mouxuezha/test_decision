@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 import os
 from langchain_community.chat_models import ChatZhipuAI, QianfanChatEndpoint, ChatBaichuan
 from langchain_community.chat_models.moonshot import MoonshotChat
@@ -115,7 +114,6 @@ class ModelCommLangchain():
         self.history_output_tokens = []
         # self.log_model_communication_name = r"auto_test\log.txt"
         self.log_model_communication_name = r"auto_test\log"+"_"+model_name+"_"+Comm_type+"_.txt"
-        load_dotenv()
         chat_model = CHAT_MODELS[model_name](**MODEL_KWARGS[model_name])
         if Comm_type == "duizhan": # TODO: 从这里来分红蓝方。
             if role == "red_player":
