@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 import random
+from examples.text_loader import text_loader
 
 class submission():
     def __init__(self,**kargs):
@@ -18,6 +19,7 @@ class submission():
         self.relation_list = [] 
         self.flag_well_defined = False
         self.config_json = {} 
+        self.text_loader = text_loader()
 
         if "next_mission_json" in kargs and "submission_list" in kargs:
             self.set_submission(kargs["next_mission_json"],kargs["submission_list"])
@@ -60,8 +62,15 @@ class submission():
     
     def set_direction(self,direction,submission_type):
         # 大模型给出的方向是高度抽象化的，需要转换成具体的坐标。根据任务时间解算坐标可也。
+        # 这段真不好提到外面JSON里面了，先在这里定制化一下。
+        if self.text_loader.case_name == "陆火联合.json":
+            self.set_direction_luhuo(direction,submission_type)
+        elif self.text_loader.case_name == "对海打击红方.json":
+            self.set_direction_duihai_red(direction,submission_type)
+        elif self.text_loader.case_name == "对海打击蓝方.json":
+            self.set_direction_duihai_blue(direction,submission_type)
 
-
+    def set_direction_luhuo(self,direction,submission_type):
         if submission_type == "陆地进攻" or submission_type == "空中侦察":
             if direction == "偏东":
                 theta_rad =  (30+random.randint(0,10)) / 180 * np.pi
@@ -95,8 +104,14 @@ class submission():
 
         self.space_arrange = [float(pos_start[0]-dVctor_here[0]), float(pos_start[1]+dVctor_here[1]), float(pos_start[0]+dVctor_here[0]), float(pos_start[1]-dVctor_here[1])]
 
+    def set_direction_duihai_red(self,direction,submission_type):
+        print("unfinished yet, submission.set_direction_duihai_red")
+        pass 
+
+    def set_direction_duihai_blue(self,direction,submission_type):
+        print("unfinished yet, submission.set_direction_duihai_blue")
         pass
-        
+
     def arrange_force(self, force_arrange_str):
         # TODO: 搞个真正的函数来实现force arrang，这样才能和后面的连起来。
         # 2025年1月2日20:07:56，现在这样倒是也能和后面连起来，没啥不行的也。
@@ -133,11 +148,14 @@ class submission():
         return flag
 
 # 这个先照着劳动竞赛的去写，看看成色。后期的话这个应该是要调用知识图谱的。
+text_loader_here = text_loader()
 # submission_type_list = ["none","陆地进攻","陆地防御","空中侦察","空中打击","电磁干扰"]
-submission_type_list = ["none", "陆地进攻", "空中侦察"] # 来个简化版的不然太多了
+submission_type_list =text_loader_here.get_certain_text("submision","submission_type_list") # 来个简化版的不然太多了
 
 # unit_type = ["坦克和自行迫榴炮", "无人机和巡飞弹", "所有地面装备"]
-unit_type = ["坦克和自行迫榴炮", "装甲车等其他地面力量", "无人机和巡飞弹"]
+# unit_type = ["坦克和自行迫榴炮", "装甲车等其他地面力量", "无人机和巡飞弹"]
+unit_type =text_loader_here.get_certain_text("submision","unit_type") # 来个简化版的不然太多了
 
 # 出击方向
-direction_list = ["偏东", "中间", "偏西"]    
+# direction_list = ["偏东", "中间", "偏西"]    
+direction_list =text_loader_here.get_certain_text("submision","direction_list") # 来个简化版的不然太多了

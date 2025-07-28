@@ -177,15 +177,15 @@ class mission_plan():
 
             for unit_type_single in unit_type:
                 if unit_type_single not in force_arranged_list:
-                    if unit_type_single == "坦克和自行迫榴炮":
+                    if unit_type_single == unit_type[0]:
                         # force_prompt += "尚未为坦克和自行迫榴炮榴炮安排作战任务，应该充分发挥其火力优势，安排其掩护我方地面力量，打击敌方防线。\n"
                         force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt1")  
                         planned_unit_type.append(unit_type_single)
-                    elif unit_type_single == "无人机和巡飞弹":
+                    elif unit_type_single == unit_type[1]:
                         force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt2")  
                         # force_prompt += "尚未为无人机和巡飞弹安排作战任务，应该充分发挥其机动和侦察优势，根据态势预测安排其前出侦察。\n"
                         planned_unit_type.append(unit_type_single)
-                    elif unit_type_single == "装甲车等其他地面力量":
+                    elif unit_type_single == unit_type[2]:
                         force_prompt += self.text_loader.get_certain_text(method_name,"force_prompt3")  
                         # force_prompt += "尚未为装甲车等其他地面力量安排作战任务，应该发挥其电子干扰、运输步兵的优势，为其他单位提供有效支援。\n"
                         planned_unit_type.append(unit_type_single) # 复制代码很是丑陋，但是不管了，无所谓了呵呵。
