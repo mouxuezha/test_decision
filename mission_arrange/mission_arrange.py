@@ -200,7 +200,7 @@ if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
     flag = 0
     if flag == 0:
-        plan_num = 3
+        plan_num = 1
         shishi = mission_arrange()
         shishi.main_loop(plan_num = plan_num)
         print("方案智能生成分系统，已完成一轮方案生成，本轮包含"+str(plan_num)+"个方案。")
@@ -213,11 +213,3 @@ if __name__ == "__main__":
         plan_num = 3
         shishi = mission_arrange()
         shishi.main_loop(plan_num = plan_num)        
-    # shishi = mission_arrange()
-    # # input_prompt = StagePrompt()
-    # # index = 1
-    # # jieguo1 = shishi.get_one_plan(input_prompt.get_stage_prompt_plan(index))
-    # # shishi.save_one_plan(jieguo1,"jieguo1")
-    # # jieguo2 = shishi.load_one_plan("jieguo1")
-    # shishi.main_loop(plan_num = 3)
-    # print("完事儿了一(?)次，看看成色。")

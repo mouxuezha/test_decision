@@ -178,24 +178,22 @@ class DeLLMa():
         return state_json
 
     def check_state_candidate(self,state_candidate_single):
-        # 先check掉一些不对的。
-        flag_check = True
-        if state_candidate_single["敌方经度"] != self.text_transfer.state_enmueration_dict["敌方经度"][1]:
-            flag_check = False
-        if not("北" in state_candidate_single["敌方纬度"]):
-            flag_check = False
-        if not("南" in state_candidate_single["我方纬度"]):
-            flag_check = False
-        if state_candidate_single["我方聚集程度"] != self.text_transfer.state_enmueration_dict["我方聚集程度"][2]:
-            flag_check = False
-        if state_candidate_single["敌方聚集程度"] != self.text_transfer.state_enmueration_dict["敌方聚集程度"][1]:
-            flag_check = False
+        # 先check掉一些不对的。# 这个是根据场景特征定制的，主要是通过这个check，来进行降维，不然维度太多就玩不了了。
+        # 难顶的是，这部分还不好弄到JSON里面去。只好整个函数挪过去了。
+        # flag_check = True
+        # if state_candidate_single["敌方经度"] != self.text_transfer.state_enmueration_dict["敌方经度"][1]:
+        #     flag_check = False
+        # if not("北" in state_candidate_single["敌方纬度"]):
+        #     flag_check = False
+        # if not("南" in state_candidate_single["我方纬度"]):
+        #     flag_check = False
+        # if state_candidate_single["我方聚集程度"] != self.text_transfer.state_enmueration_dict["我方聚集程度"][2]:
+        #     flag_check = False
+        # if state_candidate_single["敌方聚集程度"] != self.text_transfer.state_enmueration_dict["敌方聚集程度"][1]:
+        #     flag_check = False
+        flag_check=self.text_loader.check_state_candidate(state_candidate_single)
         return flag_check
 
-
-    def check_state_candidates(self):
-        # 这个是筛选state，把不要的的筛掉。
-        pass
 
     def state_enumeration_and_forecasting(self,G:str):
         # G是对应里面的用户目标。具体有几个备选的state恐怕得看是什么任务。
