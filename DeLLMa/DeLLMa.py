@@ -23,7 +23,7 @@ class DeLLMa():
         self.text_transfer= text_transfer()
         self.utility_prompt = self.text_transfer.prepare_utility_prompt(human_intent = "none")
         self.belief2score = belief2score
-        self.model_communication = ModelCommLangchain(model_name="qianfan",Comm_type="DeLLMa",role="none") # "qianfan" 
+        self.model_communication = ModelCommLangchain(model_name="local",Comm_type="DeLLMa",role="none") # "qianfan" 
 
         self.unit_type = unit_type 
         
