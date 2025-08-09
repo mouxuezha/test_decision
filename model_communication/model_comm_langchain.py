@@ -264,7 +264,7 @@ class ModelCommLangchain():
         print(str_buffer)
         
 if __name__ == '__main__':
-    flag = 0
+    flag = 3
     if flag == 0 :
         # communication = ModelCommLangchain(model_name='qianwen')
         # communication = ModelCommLangchain(model_name='deepseek')
@@ -350,7 +350,8 @@ if __name__ == '__main__':
                     answer_content += delta.content
     elif flag == 3:
         from ollama import chat
-        from ollama import ChatResponse
+        from ollama import ChatResponse  
+        # 这个得关VPN，不然会暴毙，真是个悲伤的故事
 
         response: ChatResponse = chat(model='deepseek-r1:14b', messages=[
         {

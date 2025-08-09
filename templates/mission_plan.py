@@ -23,6 +23,9 @@ class mission_plan():
         else:
             self.communicator = None
         self.DeLLMa.set_communicator(communicator=self.communicator)
+
+        self.text_loader = text_loader()
+        self.text_transfer = text_transfer()
     
     def set_users_goal(self, G:str):
         # 这个是用来对某个任务设定目标的。明确:论文里的users goal G和这里代码里的target str，道理上就是一回事儿。
@@ -44,7 +47,9 @@ class mission_plan():
         # 如果是之前已经决策决策到一半的，那就是需要把已有的submission_list转化成一些Prompt，用于输入进去
         planned_prompt, planned_unit_type = self.get_planned_prompt()
         self.DeLLMa.text_transfer.get_planned_str(planned_prompt)
-        self.DeLLMa.get_planned_unit_type(planned_unit_type)
+        
+        # self.DeLLMa.get_planned_unit_type(planned_unit_type)
+        self.DeLLMa.change_target_unit()
 
         # 这个是决定下一个要执行的任务。
         next_mission_json = self.DeLLMa.one_round(user_goal=self.target_str)

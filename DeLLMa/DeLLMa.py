@@ -26,6 +26,7 @@ class DeLLMa():
         self.model_communication = ModelCommLangchain(model_name="local",Comm_type="DeLLMa",role="none") # "qianfan" 
 
         self.unit_type = unit_type 
+        self.target_unit = unit_type[0]
         
         self.set_config_assist()
 
@@ -111,8 +112,17 @@ class DeLLMa():
         self.utility_prompt = utility_prompt
         pass 
 
-    def get_planned_unit_type(self,planned_prompt):
-        self.unit_type = planned_prompt
+    # def get_planned_unit_type(self,planned_prompt):
+    #     self.unit_type = planned_prompt
+    
+    def change_target_unit(self):
+        index = self.unit_type.index(self.target_unit)
+        
+        index_new = index + 1
+        if index_new == len(self.unit_type):
+            index_new=0
+        
+        self.target_unit = self.unit_type[index_new]
 
     def get_action_choice(self):
         # 这个原则上得从库里面读取，现在嘛先不管了。
@@ -124,6 +134,8 @@ class DeLLMa():
         # unit_type1 = unit_type
         # 新来一个机制，选过的就拿出去。保证每一次能够给所有的单位都选出足够的东西。
         unit_type1 = self.unit_type
+        # 进一步更新：每次就指定选哪个不就完事儿了。
+        unit_type1 = [self.target_unit]
 
         # 出击方向
         direction_list1 = direction_list

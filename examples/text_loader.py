@@ -67,7 +67,10 @@ class text_loader():
             flag_check = False
         if state_candidate_single["我方弹药余量"] ==  state_enmueration_dict["我方弹药余量"][0]:
             flag_check = False
-
+        if state_candidate_single["敌方阵形"] !=  state_enmueration_dict["敌方阵形"][0]:
+            flag_check = False
+        if state_candidate_single["我方侦察进度"] ==  state_enmueration_dict["我方侦察进度"][0]:
+            flag_check = False            
         return flag_check 
     
     def check_state_candidate_2025_blue(self,state_candidate_single ):
