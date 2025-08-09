@@ -38,7 +38,7 @@ class mission_arrange:
 
 
         # 在这里实现模块2的具体逻辑，根据参数生成出一个方案，返回一个方案对象。
-        one_plan = mission_plan()
+        one_plan = mission_plan(communicator=self.communicator)
 
         # 然后给它设定进去。
         if len(users_goal)>1:
@@ -67,13 +67,16 @@ class mission_arrange:
             next_report_str = one_plan.describe_last_submission()
             
             if not(self.communicator == "none"):
-                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str),2) # 这个直接传到前端去，并且保持兼容性。
+                # 0512 TODO: 保持刚才那个的基础之上，再加一个服务于表格显示的东西，先存起来。
+                next_submission_dict = one_plan.describe_last_submission2()
+                # 然后搞一个说法，给这个dict也发过去
+                self.communicator.send_submission_dict(next_submission_dict)
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
             # 但是在调试的时候可以开了它，这样就容易给出结果。
             # self.save_one_plan(one_plan,"jieguo"+str(self.index))
         
         self.save_one_plan(one_plan,"jieguo"+str(self.index))
-        self.plan_list.append(one_plan)
         return one_plan
     
     def get_void_plan(self):
@@ -84,13 +87,16 @@ class mission_arrange:
         one_plan.decide_void_submission()
         return one_plan
     
-    def main_loop(self, plan_num = 3):
+    def main_loop(self, plan_num = 3,**kargs):
         # 在这里实现模块2的主循环，不断生成方案，直到满足数量为止。
         # plan_num = plan_num
         start_time = time.time()
         for index in range(plan_num):
             # index = index + 1 # 跳过第一个，因为第一个已经生成出来了。
-            users_goal = self.input_prompt.get_stage_prompt_plan(index)
+            if "command" in kargs:
+                users_goal = kargs["command"]
+            else:
+                users_goal = self.input_prompt.get_stage_prompt_plan(index)
             jieguo = self.get_one_plan(users_goal=users_goal, index=index)
             self.plan_list.append(jieguo)
         pass
@@ -135,7 +141,7 @@ class mission_arrange:
             bili =round((index+1) / geshu,3) 
             next_report_str = more_str + " 当前进度：" +f"{bili*100}%" + "，生成子任务：" + next_report_str 
             if not(self.communicator == "none"):
-                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str)) # 这个直接传到前端去，并且保持兼容性。
+                self.communicator.send_response(self.text_transfer.response_wrap(next_report_str),color=1) # 这个直接传到前端去，并且保持兼容性。
             # self.save_one_plan(plan_input,"jieguo"+str(self.index)) # 本来就是读取出来的，这里就不要存了。
 
     def save_one_plan(self,plan:mission_plan,name:str):
@@ -149,6 +155,8 @@ class mission_arrange:
         try:
             plan.DeLLMa.output_docx = "为了保存整个对象，docx功能先关了。"
             plan.DeLLMa.model_communication = "为了保存整个对象，model_communication功能先关了。"
+            plan.DeLLMa.communicator = "为了保存整个对象，communicator先关了。"
+            plan.communicator = "为了保存整个对象，communicator先关了。"
         except:
             pass
 
@@ -195,6 +203,12 @@ class mission_arrange:
         submission_single_new.target_str = submodel_selected
         
         return submission_single_new
+    
+    def handle_script(self):
+        # 这个是处理脚本，先出一个教程
+
+        # 说一下这个是怎么个事儿。
+        pass
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
