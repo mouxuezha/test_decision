@@ -39,7 +39,7 @@ CHAT_MODELS = {
 
 MODEL_KWARGS = {
     'zhipu': {
-        'model': 'glm-4', # glm-3-turbo
+        'model': 'glm-4.5', # glm-4.5 或者glm-4
         'temperature': 0.1
     },
     'qianfan': {
@@ -264,15 +264,15 @@ class ModelCommLangchain():
         print(str_buffer)
         
 if __name__ == '__main__':
-    flag = 3
+    flag = 0
     if flag == 0 :
         # communication = ModelCommLangchain(model_name='qianwen')
         # communication = ModelCommLangchain(model_name='deepseek')
         # communication = ModelCommLangchain(model_name='zhipu')
         # communication = ModelCommLangchain(model_name='deepseek2')
         # communication = ModelCommLangchain(model_name='qianwen2')
-        # communication = ModelCommLangchain(model_name='qianwen',Comm_type="DeLLMa",role="none")
-        communication = ModelCommLangchain(model_name='local',Comm_type="DeLLMa",role="none")
+        communication = ModelCommLangchain(model_name='qianfan',Comm_type="DeLLMa",role="none") # qianwen zhipu qianfan至少是好使的。
+        # communication = ModelCommLangchain(model_name='local',Comm_type="DeLLMa",role="none")
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
         #                 我方obj_id为missile_truck0的导弹发射车位置在(100.12843,13.6423)处 \n
