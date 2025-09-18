@@ -122,11 +122,17 @@ class StagePrompt:
     
     def get_one_plan_prompt(self,index):
         # 这个的说法是，把指挥员的输入分成多次，尽量多来一些信息并且显得稍微智能一些。
-        one_plan_prompt_list = [] 
-        one_plan_prompt_list.append("提示：可指定作战风格和决心，例如“请先进行试探，避免正面冲击敌防线，然后再发起进攻。”  【请键入指挥员意图】")
-        one_plan_prompt_list.append("提示：可通过指定全局进攻方向，避开敌防御正面，例如“命令我方地面单位沿地图东侧推进，”  【请键入指挥员意图】")
-        one_plan_prompt_list.append("提示：可通过指定特定编组进行控制，例如“自行迫榴炮占据有利射击位置，无人机和巡飞弹前出至建筑物附近侦察。”  【继续键入指挥员意图】")
-        one_plan_prompt_list.append("提示：可增加分阶段的指令，例如“随着推演进行，基本摸清敌方动向之后地面部队向北突击，进攻对方防线薄弱位置，并在削弱敌方防御之后尝试占领夺控点。”  【继续键入指挥员意图】")
-        one_plan_prompt_list.append("提示：输入完成，开始方案生成......")
+        # 这个也改成从文件加载吧，逐渐现代化了。
+
+        method_name = self.__class__.__name__ + "." + inspect.stack()[0][3]
+        one_plan_prompt_list = self.text_loader.get_certain_text(method_name,"one_plan_prompt_list")
+
+        # one_plan_prompt_list = [] 
+        # one_plan_prompt_list.append("提示：可指定作战风格和决心，例如“请先进行试探，避免正面冲击敌防线，然后再发起进攻。”  【请键入指挥员意图】")
+        # one_plan_prompt_list.append("提示：可通过指定全局进攻方向，避开敌防御正面，例如“命令我方地面单位沿地图东侧推进，”  【请键入指挥员意图】")
+        # one_plan_prompt_list.append("提示：可通过指定特定编组进行控制，例如“自行迫榴炮占据有利射击位置，无人机和巡飞弹前出至建筑物附近侦察。”  【继续键入指挥员意图】")
+        # one_plan_prompt_list.append("提示：可增加分阶段的指令，例如“随着推演进行，基本摸清敌方动向之后地面部队向北突击，进攻对方防线薄弱位置，并在削弱敌方防御之后尝试占领夺控点。”  【继续键入指挥员意图】")
+        # one_plan_prompt_list.append("提示：输入完成，开始方案生成......")
+        
         prompt_output = one_plan_prompt_list[index]
         return prompt_output

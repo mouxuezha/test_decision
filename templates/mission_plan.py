@@ -214,6 +214,99 @@ class mission_plan():
         # dict_single["任务"] = submission_single.type_str
         return dict_single2
 
+    def describe_last_submission3(self,index=-1):
+        # 这个是服务于对海打击场景的，先实现一个，再考虑拿出去放在外面。这个对应的是对海打击红方。
+        # 这个是生成一个结构化数据准备拿去往前端发
+        # 先取出一个子任务出来看看成色
+        submission_single = self.submission_list[index]
+
+        # 然后生成一个dict，里面应该包含如下字段：序号，任务，平台，出发地点，出发时间，挂载，目标。
+        dict_single = {}
+        dict_single["序号"] = index
+        dict_single["平台"] = submission_single.force_arrange 
+        dict_single["出发地点"] = "红方机动阵位"
+        dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
+
+        # 然后任务这里定制一些说法
+        if submission_single.time_arrange[0] < 999:
+            # 这里面的都写成侦查阶段
+            if submission_single.force_arrange == "无人机群":
+                dict_single["任务"] = "空中侦察"
+                dict_single["挂载"] = "机载雷达、机载光电"
+                dict_single["目标"] = "探明敌方舰队队形和机动方向，寻找敌方布防的薄弱环节。监视敌方舰载机前出情况。"
+            elif submission_single.force_arrange == "导弹发射车":
+                dict_single["任务"] = "地面机动"
+                dict_single["挂载"] = "高成本攻击弹、低成本攻击弹"
+                dict_single["目标"] = "隐蔽前出，占领合适发射阵地，完成发射前准备。"
+            elif submission_single.force_arrange == "引导快艇群":
+                dict_single["任务"] = "海上机动"
+                dict_single["挂载"] = "艇载雷达、艇载观瞄" 
+                dict_single["目标"] = "出海搜索敌方舰队，发现潜在的高价值跟踪目标。监视敌方舰载机前出情况。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方出发阵地"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
+        elif submission_single.time_arrange[0] < 3001:
+            # 这里面的都写成进攻阶段
+            if submission_single.force_arrange == "无人机群":
+                dict_single["任务"] = "空中搜索"
+                dict_single["挂载"] = "机载雷达、机载光电"
+                dict_single["目标"] = "进攻阶段，监视敌舰队动向，补充战场态势信息。持续搜索特定区域。"
+            elif submission_single.force_arrange == "导弹发射车" :
+                dict_single["任务"] = "协同打击"
+                dict_single["挂载"] = "高成本攻击弹、低成本攻击弹"
+                dict_single["目标"] = "进攻阶段，占据有利地形，根据统一协调，充分发扬火力，消灭综合选定的目标。"
+            elif submission_single.force_arrange == "引导快艇群":
+                dict_single["任务"] = "迫近引导"
+                dict_single["挂载"] = "艇载雷达、艇载观瞄" 
+                dict_single["目标"] = "进攻阶段，分配选定各自引导目标，接近目标并控制距离，完成引导打击。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方机动阵位"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
+        else:
+            # 这里面都写成收尾阶段。
+            if submission_single.force_arrange == "无人机群":
+                dict_single["任务"] = "空中搜索"
+                dict_single["挂载"] = "机载雷达、机载光电"
+                dict_single["目标"] = "收尾阶段，根据现存无人机数量和敌我态势，规划调整搜索区域，减少目标遗漏"
+            elif submission_single.force_arrange == "导弹发射车":
+                dict_single["任务"] = "机动隐蔽"
+                dict_single["挂载"] = "高成本攻击弹、低成本攻击弹"
+                dict_single["目标"] = "收尾阶段，发射后进行机动和隐蔽，以躲避敌舰载机搜索打击。统一协调部分发射车轮流保持发射准备，以应对敌情变化"
+            elif submission_single.force_arrange == "引导快艇群":
+                dict_single["任务"] = "迫近引导"
+                dict_single["挂载"] = "艇载雷达、艇载观瞄" 
+                dict_single["目标"] = "收尾阶段，继续跟踪监视敌方舰艇以配合打击。已完成引导的快艇进行海域搜索，准备新一批引导。"
+            
+            dict_single["平台"] = submission_single.force_arrange 
+            dict_single["出发地点"] = "红方机动阵位"
+            dict_single["出发时间"] = str(submission_single.time_arrange[0]) + "秒"
+        
+        # 加两个空行看看。
+        dict_single["目标"] = "\n" + dict_single["目标"] + "\n"
+
+        # 转一下格式，给雪楠哥那边方便做序列化。
+        transfer_dict = {}
+        transfer_dict["num"] = "序号"
+        transfer_dict["platform"] = "平台"
+        transfer_dict["strBeginPos"] = "出发地点"
+        transfer_dict["strBeginTime"] = "出发时间"
+        transfer_dict["strTask"] = "任务"
+        transfer_dict["strWeapon"] = "挂载"
+        transfer_dict["strTarget"] = "目标"
+        
+        dict_single2 = {} 
+        for key_singe in transfer_dict:
+            try:
+                dict_single2[key_singe] = dict_single[transfer_dict[key_singe]]
+            except:
+                dict_single2[key_singe] = "传输失败"
+
+
+        # dict_single["任务"] = submission_single.type_str
+        return dict_single2
+
     
     def get_planned_prompt(self):
         # 如果是之前已经决策决策到一半的，那就是需要把已有的submission_list转化成一些Prompt，用于输入进去

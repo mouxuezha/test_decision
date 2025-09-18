@@ -68,8 +68,9 @@ class mission_arrange:
             
             if not(self.communicator == "none"):
                 self.communicator.send_response(self.text_transfer.response_wrap(next_report_str),2) # 这个直接传到前端去，并且保持兼容性。
-                # 0512 TODO: 保持刚才那个的基础之上，再加一个服务于表格显示的东西，先存起来。
-                next_submission_dict = one_plan.describe_last_submission2()
+                # TODO: 整理一下这里的结构，弄到外面JSON里面去最好，现在这样本质上是很垃圾的写法。
+                # next_submission_dict = one_plan.describe_last_submission2() 
+                next_submission_dict = one_plan.describe_last_submission3()
                 # 然后搞一个说法，给这个dict也发过去
                 self.communicator.send_submission_dict(next_submission_dict)
             # 这个别每一步存。由于兼容性问题，存的时候要把docx那部分删了，所以每一步都存的话会影响docx的输出。
