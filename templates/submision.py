@@ -70,6 +70,23 @@ class submission():
         elif self.text_loader.case_name == "对海打击蓝方.json":
             self.set_direction_duihai_blue(direction,submission_type)
 
+    def set_direction_calculate(self,pos_start,pos_end,theta_rad ):
+        # pos_end = np.array([100.1247, 13.6615])
+        vector_go = pos_end - pos_start
+        vector_go_L = np.linalg.norm(vector_go)
+        vector_go_n = vector_go / vector_go_L
+        bili = (self.time_arrange[0] + self.time_arrange[1])/2 / (5000 + random.randint(0, 1145))   # 做个平均值         
+        M_rotate = np.array([[np.cos(theta_rad), -np.sin(theta_rad)], [np.sin(theta_rad), np.cos(theta_rad)]])
+        
+        L_here = bili*vector_go_L
+
+        dVctor_here = L_here * vector_go_n # 修正向量旋转前
+        dVctor_here = M_rotate @ dVctor_here # 修正向量旋转后
+
+        self.space_arrange = [float(pos_start[0]-dVctor_here[0]), float(pos_start[1]+dVctor_here[1]), float(pos_start[0]+dVctor_here[0]), float(pos_start[1]-dVctor_here[1])] 
+
+        return self.space_arrange  
+
     def set_direction_luhuo(self,direction,submission_type):
         if submission_type == "陆地进攻" or submission_type == "空中侦察":
             if direction == "偏东":
@@ -91,25 +108,37 @@ class submission():
         
         # pos_start = np.array([100.15427471282, 13.60603147549])
         pos_end = np.array([100.1247, 13.6615])
-        vector_go = pos_end - pos_start
-        vector_go_L = np.linalg.norm(vector_go)
-        vector_go_n = vector_go / vector_go_L
-        bili = (self.time_arrange[0] + self.time_arrange[1])/2 / (5000 + random.randint(0, 1145))   # 做个平均值         
-        M_rotate = np.array([[np.cos(theta_rad), -np.sin(theta_rad)], [np.sin(theta_rad), np.cos(theta_rad)]])
-        
-        L_here = bili*vector_go_L
-
-        dVctor_here = L_here * vector_go_n # 修正向量旋转前
-        dVctor_here = M_rotate @ dVctor_here # 修正向量旋转后
-
-        self.space_arrange = [float(pos_start[0]-dVctor_here[0]), float(pos_start[1]+dVctor_here[1]), float(pos_start[0]+dVctor_here[0]), float(pos_start[1]-dVctor_here[1])]
+        self.space_arrange = self.set_direction_calculate(pos_start,pos_end,theta_rad)
 
     def set_direction_duihai_red(self,direction,submission_type):
-        print("unfinished yet, submission.set_direction_duihai_red")
-        pass 
+        # 这个逻辑不一样了，陆战那个是“去某个点”，这个得是“去某个特定的区域”了
+        if submission_type == "前出侦打" :
+            if direction == "偏东":
+                center_LLA = [49.95-0.5,13.03,0] 
+            elif direction == "偏西":
+                center_LLA = [45.23+0.5,12.02,0] 
+            # elif direction == "中间": 
+            #     center_LLA = [47.53,12.43,0] 
+            else:
+                raise Exception("invalid direction")
+        elif submission_type == "避免交战":
+            if direction == "偏东":
+                center_LLA = [49.95-0.5,13.03-0.8,0] 
+            elif direction == "偏西":
+                center_LLA = [45.23+0.5,12.02-0.8,0] 
+            # elif direction == "中间": 
+            #     center_LLA = [47.53,12.43,0] 
+            else:
+                raise Exception("invalid direction")
+        else:
+            return # 这个是如果是none或者啥怪东西，就直接return了。
+        dl = 0.8 + random.uniform(-0.1, 0.1)
+        center_LLA_change = [center_LLA[0] + random.uniform(-0.1, 0.1), center_LLA[1] + random.uniform(-0.1, 0.1),0]
+        self.space_arrange = [center_LLA_change[0]-dl, center_LLA_change[1] + dl, center_LLA_change[0]+dl, center_LLA_change[1] - dl]  
 
     def set_direction_duihai_blue(self,direction,submission_type):
-        print("unfinished yet, submission.set_direction_duihai_blue")
+        # print("unfinished yet, submission.set_direction_duihai_blue")
+        raise Exception("unfinished yet, submission.set_direction_duihai_blue")
         pass
 
     def arrange_force(self, force_arrange_str):

@@ -167,7 +167,8 @@ class ModelCommLangchain():
         if MODEL_KWARGS[self.model_name].get("stream", False):
             resp_str = self.communicate_with_model_stream(message)
         elif self.model_name == 'local':
-            # 紧急状态
+            # 紧急状态.    
+            # # 如果这里报错了，第一步先检查VPN关没关，没关先关了。
             response: ChatResponse = chat(model='deepseek-r1:14b', messages=[
             {
                 'role': 'user',
@@ -264,14 +265,14 @@ class ModelCommLangchain():
         print(str_buffer)
         
 if __name__ == '__main__':
-    flag = 0
+    flag = 3
     if flag == 0 :
         # communication = ModelCommLangchain(model_name='qianwen')
         # communication = ModelCommLangchain(model_name='deepseek')
         # communication = ModelCommLangchain(model_name='zhipu')
         # communication = ModelCommLangchain(model_name='deepseek2')
         # communication = ModelCommLangchain(model_name='qianwen2')
-        communication = ModelCommLangchain(model_name='qianfan',Comm_type="DeLLMa",role="none") # qianwen zhipu qianfan至少是好使的。
+        communication = ModelCommLangchain(model_name='local',Comm_type="DeLLMa",role="none") # qianwen zhipu qianfan至少是好使的。
         # communication = ModelCommLangchain(model_name='local',Comm_type="DeLLMa",role="none")
         # communication.communicate_with_model('你好')
         # test_str = """我方obj_id为MainBattleTank_ZTZ100_3的坦克位置在(100.12147,13.6409)处 \n
