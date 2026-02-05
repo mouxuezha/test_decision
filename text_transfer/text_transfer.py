@@ -365,6 +365,7 @@ class text_transfer(object):
         # 切出来，然后转成JSON，转不成就报错。反正是实验代码，要什么稳定性，该报错报错就是了。
         json_str = self.cut_from_str(input_str, "{", "}",model="json")
         json_str = self.del_note_from_str(json_str)
+        json_str = self.clean_the_str(json_str)
         json_str = "{" + json_str + "}"
         try:
             json_jieguo = json.loads(json_str)
@@ -398,7 +399,7 @@ class text_transfer(object):
     
     def clean_the_str(self, input_str:str):
         # 这个是清理字符串的，把一些没用的符号去掉.
-        clean_list = ["**","//"]
+        clean_list = ["**","//","\'","\n","...,"]
         for clean_str in clean_list:
             while clean_str in input_str:
                 input_str = input_str.replace(clean_str,"")
@@ -406,6 +407,8 @@ class text_transfer(object):
         # 然后特殊处理。
         while "\n\n" in input_str:  
             input_str = input_str.replace("\n\n","\n")
+        while "..." in input_str:
+            input_str = input_str.replace("...","1145")
 
         # 然后继续特殊处理，把json切走。
         if "json" in input_str:

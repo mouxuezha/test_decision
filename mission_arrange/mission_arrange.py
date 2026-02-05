@@ -213,7 +213,7 @@ class mission_arrange:
 
 if __name__ == "__main__":
     # 在这里实现模块2的测试代码，可以调用get_one_plan函数生成方案，并输出方案内容。
-    flag = 0
+    flag = 2
     if flag == 0:
         plan_num = 3
         shishi = mission_arrange()
@@ -225,6 +225,6 @@ if __name__ == "__main__":
         shishi.main_loop_debug(plan_num=3)
     elif flag == 2:
         # 换场景了，重开一个以示友好。这个分支里面该删就删。
-        plan_num = 3
+        plan_num = 1
         shishi = mission_arrange()
         shishi.main_loop(plan_num = plan_num)        
